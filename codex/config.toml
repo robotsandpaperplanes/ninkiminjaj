@@ -1,0 +1,5 @@
+# Six available profiles do not imply six running agents.
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 2
+# Model and reasoning effort inherit from the main session.
