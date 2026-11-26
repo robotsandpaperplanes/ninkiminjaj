@@ -9,8 +9,18 @@ export type Permissions = {
   deleteOwnEvents: boolean; viewAllEvents: boolean; editAllEvents: boolean; createCourses: boolean;
 };
 export type Settings = { autoRecord: boolean; autoTranscript: boolean; recordingAccess: 'self' | 'participants' | 'link'; camera: boolean; microphone: boolean };
+export const meetingPreferenceLabels = {
+  autoRecord: 'Запускать запись при старте мероприятия',
+  recordingAccess: 'Доступ к записи мероприятия',
+  camera: 'Включать мою камеру при подключении',
+  microphone: 'Включать мой микрофон при подключении',
+};
+export const recordingAccessLabels: Record<Settings['recordingAccess'], string> = {
+  self: 'Только у меня', participants: 'Только у участников', link: 'У всех по ссылке',
+};
 export type GroupDetails = {
   role?: RoleConfig;
+  meetingInvitationType?: 'shared' | 'personal';
   multiPermissions?: Record<string, 'deny' | 'unset' | 'allow'>;
   inviteToken: string; passwordProtected: boolean; invitePassword: string;
   chatTeam: string; boardTeam: string; eventLimit: number; storageLimit: number; storageUsed: number;

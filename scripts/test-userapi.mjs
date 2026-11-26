@@ -3,6 +3,13 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { availableScopes, keyStatus, initialApiState, generateDemoSecret, transitionApiKey, changeAdminAccess, loadApiState } from '../src/api-model.ts';
 
+test('new audit events snapshot the current organization name', () => {
+  const original = initialApiState();
+  const next = changeAdminAccess(original, 'dwight', true, 'Учебная организация');
+  assert.equal(next.events[0].organization, 'Учебная организация');
+  assert.deepEqual(next.events.slice(1), original.events);
+});
+
 test('new and legacy keys cannot cross their scope boundaries', () => {
   const modern = availableScopes('secure').map(s => s.code);
   const legacy = availableScopes('legacy').map(s => s.code);

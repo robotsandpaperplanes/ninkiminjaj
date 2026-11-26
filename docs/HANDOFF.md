@@ -1,5 +1,7 @@
 # Migration handoff
 
+Integration update: the shared Cloud/On-Prem prototype is now implemented. Start with [INTEGRATION.md](INTEGRATION.md) for current routing, mode switching, state ownership, validation and limitations. The original export snapshot below documents the Cloud baseline before integration.
+
 Snapshot: 22 November 2026, Europe/Moscow. Start here, then read PRODUCT_OVERVIEW.md, DECISIONS.md and BACKLOG.md. These documents consolidate the latest state without the conversation history.
 
 ## Current state

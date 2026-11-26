@@ -2,7 +2,7 @@
 
 ## Project
 Interactive prototype for an enterprise collaboration platform's administration panel.
-Treat the current repository and approved feature specifications as source of truth.
+`src/` is the authoritative application source. `docs/INTEGRATION.md` is the current integration reference; read the relevant approved feature specification for product rules. `migration/on-prem/` is a read-only historical reference, not active source.
 
 ## Global rules
 - Write code and technical documentation in English; keep user-facing UI copy in Russian.
@@ -10,7 +10,8 @@ Treat the current repository and approved feature specifications as source of tr
 - Follow existing components, design tokens and project patterns. No unrelated refactoring.
 - Never invent security/RBAC/SSO/federation policy; flag missing approval or requirements.
 - Use synthetic data only; never add real customer records or secrets.
-- Inspect only files and specs relevant to the request; avoid full-repo exploration by default.
+- Start with scoped path discovery or symbol search, then read only relevant file sections. Expand to imports, state owners, shared components, or historical references when a concrete dependency requires it.
+- Exclude `migration/on-prem/`, `output/`, `dist/`, and `node_modules/` from routine exploration; inspect them when the task specifically depends on them.
 - Keep changes focused and reviewable. Run relevant checks when available.
 
 ## Delegation and efficiency

@@ -1,4 +1,5 @@
-import { Box, MenuItem, TextField, Typography } from '@mui/material';
+import { TextField } from './app/ModeVisibility';
+import { Box, MenuItem, Typography } from '@mui/material';
 import type { RoleConfig } from './role-model';
 const types = [
   { value: 'user', label: 'Пользовательская', helper: 'Доступ к продуктам и рабочим функциям без административных полномочий.' },

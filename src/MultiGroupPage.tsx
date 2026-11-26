@@ -1,21 +1,25 @@
+import { Dialog, Menu, TextField } from './app/ModeVisibility';
 import UnsavedChangesBar from './UnsavedChangesBar';
 import { useEffect, useState, type MutableRefObject, type ReactNode } from 'react';
 import {
-  Alert, Avatar, Box, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent,
+  Alert, Avatar, Box, Button, Checkbox, Chip, DialogActions, DialogContent,
   DialogTitle, Divider, FormControlLabel, IconButton, InputAdornment, LinearProgress,
-  Link, Menu, MenuItem, Paper, Stack, Switch, Tab, Table, TableBody, TableCell,
-  TableContainer, TableHead, TablePagination, TableRow, Tabs, TextField, Tooltip, Typography,
+  Link, MenuItem, Paper, Stack, Switch, Tab, Table, TableBody, TableCell,
+  TableContainer, TableHead, TablePagination, TableRow, Tabs, Tooltip, Typography,
 } from '@mui/material';
 import { AddOutlined, ArrowBackOutlined, ContentCopyOutlined, FlagRounded, MoreVertOutlined, SearchOutlined, StarRounded } from '@mui/icons-material';
 import type { Group } from './data';
 import { defaultPermissions, defaultSettings, extraPeople, getDetails, newToken, people, productLabels, type GroupDetails, type Member, type Permissions, type Settings } from './group-model';
 
-import { PermissionControl } from './PermissionControl';
-import { systemGroups, type PermissionState } from './multi-model';
+import { PermissionControl, PermissionRow } from './PermissionControl';
+import { permissionState, systemGroups, type PermissionState } from './multi-model';
 import { roleConfig, everyoneSettings } from './role-model';
 import { RoleType, RoleQuotas, RoleRights, RoleSettings, RolePreview } from './MultiGroupControls';
+import type { GroupDefaultsTab } from './app/routes';
+import { defaultProductRightStates } from './functional-group-rights';
 
 type TabKey = 'main' | 'members' | 'products' | 'permissions' | 'settings';
+const multiGroupProducts = [...productLabels, 'Диск'];
 function Panel({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
     <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} sx={{ mb: 2.5 }}>
@@ -39,13 +43,14 @@ function Section({ title, children, first = false }: { title: string; children: 
 }
 function pluralGroups(n: number) { return n % 10 === 1 && n % 100 !== 11 ? 'группа' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'группы' : 'групп'; }
 
-export default function GroupPage({ group, groups, onSave, onDelete, onBack, notify, leaveRef, roleMode = false }: {
+export default function GroupPage({ group, groups, onSave, onDelete, onBack, notify, leaveRef, roleMode = false, defaultTab }: {
   readOnly?: boolean; scenario?: string; roleMode?: boolean; group: Group; groups: Group[]; onSave: (group: Group) => void; onDelete: (id: string) => void;
   onBack: () => void; notify: (message: string) => void; leaveRef: MutableRefObject<((after?: () => void) => void) | null>;
+  defaultTab?: GroupDefaultsTab;
 }) {
   const system = group.systemGroup;
   const systemInfo = system ? systemGroups[system] : undefined;
-  const [tab, setTab] = useState<TabKey>('main');
+  const [tab, setTab] = useState<TabKey>(defaultTab ?? 'main');
   const [name, setName] = useState(group.name);
   const [manager, setManager] = useState(group.manager);
   const [draft, setDraft] = useState<GroupDetails>(() => structuredClone(getDetails(group)));
@@ -82,9 +87,10 @@ export default function GroupPage({ group, groups, onSave, onDelete, onBack, not
   function cancelChanges() { setName(group.name); setManager(group.manager); setDraft(structuredClone(getDetails(group))); setError(''); setSaveAttention(0); }
   useEffect(() => { if (!dirty) setSaveAttention(0); }, [dirty]);
   useEffect(() => { leaveRef.current = back; return () => { leaveRef.current = null; }; });
+  useEffect(() => { setTab(defaultTab ?? 'main'); setError(''); }, [defaultTab]);
   function apply() {
     if (!name.trim()) { setTab('main'); setError(roleMode ? 'Введите название группы.' : 'Введите название группы.'); return; }
-    if (groups.some(g => g.id !== group.id && g.name.trim().toLocaleLowerCase('ru') === name.trim().toLocaleLowerCase('ru'))) { setTab('main'); setError(roleMode ? 'Группа с таким названием уже существует.' : 'Группа с таким названием уже существует.'); return; }
+    if (!system && groups.some(g => g.id !== group.id && g.name.trim().toLocaleLowerCase('ru') === name.trim().toLocaleLowerCase('ru'))) { setTab('main'); setError(roleMode ? 'Группа с таким названием уже существует.' : 'Группа с таким названием уже существует.'); return; }
     if (!roleMode && draft.passwordProtected && draft.invitePassword.trim().length < 6) { setTab('main'); setError('Укажите пароль для ссылки — минимум 6 символов.'); return; }
     if (communicationState === 'allow' && draft.permissions.communication === 'groups' && !visibleCommunicationGroups.length) { setTab('permissions'); setError(roleMode ? 'Выберите хотя бы одну группу для общения.' : 'Выберите хотя бы одну группу для общения.'); return; }
     const normalized = { ...draft, permissions: { ...draft.permissions, communicationGroups: visibleCommunicationGroups } };
@@ -93,10 +99,31 @@ export default function GroupPage({ group, groups, onSave, onDelete, onBack, not
     notify(roleMode ? 'Изменения группы сохранены' : 'Изменения группы сохранены');
   }
   function resetTab() {
-    if (tab === 'products') patch({ products: Object.fromEntries((roleMode ? [...productLabels, 'Диск'] : productLabels).map(p => [p, false])) });
-    if (tab === 'permissions') { const baseline = groups.find(g => g.systemGroup === 'everyone'); if (baseline && baseline.id !== group.id) { const d = getDetails(baseline); patch({ multiPermissions: structuredClone(d.multiPermissions ?? {}), permissions: structuredClone(d.permissions), products: { ...d.products }, role: { ...config, adminPermissions: {} } }); notify('Разрешения Everyone скопированы в черновик. Нажмите «Сохранить».'); return; } }
-    if (tab === 'permissions') patch({ multiPermissions: {}, ...(roleMode ? { role: { ...config, adminPermissions: {} }, products: Object.fromEntries([...productLabels, 'Диск'].map(p => [p, false])) } : {}), permissions: { ...structuredClone(defaultPermissions), communicationGroups: roleMode ? defaultPermissions.communicationGroups.filter(id => groups.some(g => g.id === id)) : groups.filter(g => g.id !== group.id).slice(0, 3).map(g => g.id) } });
-    if (tab === 'settings') patch(roleMode ? { role: { ...config, preferences: { ...everyoneSettings, ...groups.find(g => g.systemGroup === 'everyone')?.details?.role?.preferences } } } : { settings: { ...defaultSettings } });
+    const baseline = groups.find(g => g.systemGroup === 'everyone');
+    const defaults = baseline && getDetails(baseline);
+    if (tab === 'products') {
+      const products = Object.fromEntries((roleMode ? multiGroupProducts : productLabels).map(product => [product, false]));
+      const multiPermissions = Object.fromEntries(Object.entries(draft.multiPermissions ?? {}).filter(([key]) => !key.startsWith('product:')));
+      patch({ products, ...(roleMode ? { multiPermissions } : {}) });
+      notify('Значения восстановлены. Нажмите «Сохранить», чтобы сохранить.');
+      return;
+    }
+    if (tab === 'permissions' && baseline?.id !== group.id && defaults) {
+      const baselineRights = Object.entries(defaults.multiPermissions ?? {}).filter(([key]) => !key.startsWith('product:'));
+      const currentProducts = Object.entries(draft.multiPermissions ?? {}).filter(([key]) => key.startsWith('product:'));
+      patch({
+        multiPermissions: { ...defaultProductRightStates, ...Object.fromEntries([...baselineRights, ...currentProducts]) },
+        permissions: structuredClone(defaults.permissions),
+        role: { ...config, adminPermissions: {} },
+      });
+      notify('Разрешения @everyone скопированы в черновик. Нажмите «Сохранить».');
+      return;
+    }
+    if (tab === 'permissions') patch({ multiPermissions: {}, ...(roleMode ? { role: { ...config, adminPermissions: {} }, products: Object.fromEntries(multiGroupProducts.map(p => [p, false])) } : {}), permissions: { ...structuredClone(defaultPermissions), communicationGroups: roleMode ? defaultPermissions.communicationGroups.filter(id => groups.some(g => g.id === id)) : groups.filter(g => g.id !== group.id).slice(0, 3).map(g => g.id) } });
+    if (tab === 'settings') patch(roleMode ? {
+      role: { ...config, preferences: { ...everyoneSettings, ...defaults?.role?.preferences } },
+      meetingInvitationType: defaults?.meetingInvitationType ?? 'shared',
+    } : { settings: { ...defaultSettings } });
     notify(roleMode ? 'Значения @everyone перенесены в черновик группы. Нажмите «Сохранить», чтобы сохранить.' : 'Значения восстановлены. Нажмите «Сохранить», чтобы сохранить.');
   }
   function openLimit(type: 'event' | 'storage') { setLimitEdit(type); setLimitValue(String(type === 'event' ? draft.eventLimit : draft.storageLimit)); setLimitError(''); }
@@ -118,7 +145,7 @@ export default function GroupPage({ group, groups, onSave, onDelete, onBack, not
     setPage(0);
   }
   const actions = <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" gap={1.5} sx={{ mt: 2.5 }}>
-    {tab !== 'main' && !system ? <Button onClick={resetTab} sx={{ justifyContent: 'flex-start' }}>{roleMode ? (tab === 'permissions' ? 'Применить разрешения @everyone к этой группе' : 'Применить настройки @everyone к этой группе') : 'Сбросить до настроек по умолчанию'}</Button> : null}
+    {tab !== 'main' && !system ? <Button onClick={resetTab} sx={{ justifyContent: 'flex-start' }}>{roleMode && tab !== 'products' ? (tab === 'permissions' ? 'Применить разрешения @everyone к этой группе' : 'Применить настройки @everyone к этой группе') : 'Сбросить до настроек по умолчанию'}</Button> : null}
   </Stack>;
 
   if (system && system !== 'everyone') return <>
@@ -138,8 +165,8 @@ export default function GroupPage({ group, groups, onSave, onDelete, onBack, not
     <Tabs value={tab} onChange={(_, value: TabKey) => { setTab(value); setError(''); }} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label={roleMode ? 'Разделы группы' : 'Разделы группы'} sx={{ borderBottom: 1, borderColor: 'divider', mb: 3, '& .MuiTab-root': { textTransform: 'none', minWidth: 0, px: 2, fontSize: 14, fontWeight: 500 }, '& .MuiTab-root:first-of-type': { pl: 0 }, '& .MuiTabs-indicator': { height: 2 } }}>
       <Tab value="main" label="Основное" id="group-tab-main" aria-controls="group-panel-main" />
       <Tab disabled={!!system} value="members" label={system === 'everyone' ? 'Все сотрудники' : 'Сотрудники · ' + draft.members.length} id="group-tab-members" aria-controls="group-panel-members" />
-      {!roleMode && <Tab value="products" label="Доступ к продуктам" id="group-tab-products" aria-controls="group-panel-products" />}
-      <Tab value="permissions" label={roleMode ? 'Разрешения' : 'Права'} id="group-tab-permissions" aria-controls="group-panel-permissions" />
+      <Tab value="products" label="Доступ к продуктам" id="group-tab-products" aria-controls="group-panel-products" />
+      <Tab value="permissions" label="Права" id="group-tab-permissions" aria-controls="group-panel-permissions" />
       <Tab value="settings" label="Настройки" id="group-tab-settings" aria-controls="group-panel-settings" />
     </Tabs>
     {error && <Alert severity="error" sx={{ maxWidth: 820, mb: 2 }}>{error}</Alert>}
@@ -197,8 +224,18 @@ export default function GroupPage({ group, groups, onSave, onDelete, onBack, not
         </Table></TableContainer>
         {filteredMembers.length > 10 && <TablePagination component="div" count={filteredMembers.length} page={page} rowsPerPage={10} rowsPerPageOptions={[10]} onPageChange={(_, next) => setPage(next)} labelDisplayedRows={({ from, to, count }) => `${from}–${to} из ${count}`} />}
       </>}
-      {tab === 'products' && <><Panel title="Продукты">{(roleMode ? [...productLabels, 'Диск'] : productLabels).map(product => <ToggleRow key={product} label={product} value={!!draft.products[product]} onChange={value => patch({ products: { ...draft.products, [product]: value } })} />)}</Panel>{actions}</>}
-      {tab === 'permissions' && roleMode && <><Panel title="Разрешения"><RoleRights states={draft.multiPermissions} onState={changeState} systemDefault={!!system} products={draft.products} onProduct={(name, enabled) => patch({ products: { ...draft.products, [name]: enabled } })} permissions={draft.permissions} onPermission={permission} value={config} onChange={role => patch({ role })} communication={<>
+      {tab === 'products' && <><Panel title="Продукты">
+        {roleMode ? multiGroupProducts.map(product => {
+          const key = 'product:' + product;
+          return <PermissionRow key={key} label={product} value={permissionState(draft.multiPermissions, key, !!draft.products[product])}
+            onChange={state => {
+              changeState(key, state);
+              patch({ products: { ...draft.products, [product]: state === 'allow' } });
+            }} />;
+        }) : productLabels.map(product => <ToggleRow key={product} label={product} value={!!draft.products[product]}
+          onChange={value => patch({ products: { ...draft.products, [product]: value } })} />)}
+      </Panel>{actions}</>}
+      {tab === 'permissions' && roleMode && <><Panel title="Права"><RoleRights states={draft.multiPermissions} onState={changeState} systemDefault={!!system} permissions={draft.permissions} onPermission={permission} value={config} onChange={role => patch({ role })} communication={<>
           <SettingRow label="Общение с сотрудниками" description="Личные чаты и звонки"><PermissionControl label="Общение с сотрудниками" value={communicationState} onChange={state => { changeState('communication', state); if (state === 'allow' && draft.permissions.communication === 'none') permission('communication', 'all'); }} /></SettingRow>
           {communicationState === 'allow' && <SettingRow label="Область общения"><TextField select value={draft.permissions.communication === 'none' ? 'all' : draft.permissions.communication} onChange={e => permission('communication', e.target.value as Permissions['communication'])} slotProps={{ select: { inputProps: { 'aria-label': 'Область общения' } } }} sx={{ width: 205 }}><MenuItem value="all">Все сотрудники</MenuItem><MenuItem value="groups">Выбранные группы</MenuItem></TextField></SettingRow>}
           {communicationState === 'allow' && draft.permissions.communication === 'groups' && <SettingRow label={`Выбрано групп: ${visibleCommunicationGroups.length}`}><Button size="small" onClick={() => { setSelectedGroups(visibleCommunicationGroups); setGroupSelect(true); }}>Изменить</Button></SettingRow>}
@@ -225,7 +262,8 @@ export default function GroupPage({ group, groups, onSave, onDelete, onBack, not
         </Section>
         <Section title="Курсы"><ToggleRow label="Возможность создавать курсы" value={draft.permissions.createCourses} onChange={v => permission('createCourses', v)} /></Section>
       </Panel>{actions}</>}
-      {tab === 'settings' && roleMode && <><Panel title="Настройки"><RoleSettings value={config} onChange={role => patch({ role })} /></Panel>{actions}</>}
+      {tab === 'settings' && roleMode && <><Panel title="Настройки"><RoleSettings value={config} onChange={role => patch({ role })}
+        invitationType={draft.meetingInvitationType ?? 'shared'} onInvitationTypeChange={meetingInvitationType => patch({ meetingInvitationType })} /></Panel>{actions}</>}
       {tab === 'settings' && !roleMode && <><Panel title="Настройки">
         <Section title="Запись мероприятия" first>
           <ToggleRow label="Запускать запись при старте мероприятия" description="Запись начнётся автоматически после запуска мероприятия" value={draft.settings.autoRecord} onChange={v => setting('autoRecord', v)} />

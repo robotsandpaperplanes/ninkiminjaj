@@ -1,8 +1,8 @@
 # MTS Link Admin Panel
 
-A shared local interactive prototype, exported on 22 November 2026. The UI is Russian; technical documentation is English. The app directory and npm package are `admin-panel`.
+A unified Cloud and On-Prem interactive prototype. The UI is Russian; technical documentation is English. The npm package is `admin-panel`.
 
-Start with [HANDOFF.md](docs/HANDOFF.md). It explains setup, current architecture, data portability, verification and remaining risks.
+Start with [INTEGRATION.md](docs/INTEGRATION.md) for the current architecture, routes, state boundaries and verification. [HANDOFF.md](docs/HANDOFF.md) records the earlier Cloud export.
 
 ## Run locally
 
@@ -13,7 +13,7 @@ npm ci
 npm run dev -- --port 5182
 ```
 
-Open http://127.0.0.1:5182/#employees. Use /#api for API administration; navigate to current groups, multi-groups and Roles from the sidebar.
+Open http://127.0.0.1:5182/cloud/employees or http://127.0.0.1:5182/on-prem/certificates. Legacy `/#employees` and `/#api` links still resolve to Cloud sections.
 
 ```sh
 npm run build
@@ -21,21 +21,25 @@ npm test
 python3 scripts/export-local.py
 ```
 
-Python 3 is needed only for offline export. The preserved sites/admin-panel layout makes the exporter write to output/admin-panel at package root. No backend, real credentials or environment variables are required.
+Python 3 is needed only for offline export. The exporter writes to `output/admin-panel` two directories above this project. No backend, real credentials or environment variables are required.
+
+## Unified administration
+
+Use the header's «Облако / Сервер» menu to switch modes. Direct entry points are `/cloud/employees` and `/on-prem/certificates`; On-Prem also includes License and Network settings. Both modes use the existing Cloud theme, with independent synthetic data and local working copies. See [INTEGRATION.md](docs/INTEGRATION.md) for routing, state boundaries, verification and limitations.
 
 ## Documentation
 
-- [PRODUCT_OVERVIEW.md](docs/PRODUCT_OVERVIEW.md): purpose, sections and future server edition.
-- [FEATURES.md](docs/FEATURES.md): implemented workflows and scenarios.
+- [INTEGRATION.md](docs/INTEGRATION.md): current unified architecture, modes and verification.
+- [PRODUCT_OVERVIEW.md](docs/PRODUCT_OVERVIEW.md) and [FEATURES.md](docs/FEATURES.md): Cloud export scope and workflows.
 - [DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md): actual visual tokens and known differences.
 - [BUSINESS_RULES.md](docs/BUSINESS_RULES.md): rules, assumptions and implementation boundaries.
 - [DECISIONS.md](docs/DECISIONS.md): current approved decisions and open topics.
 - [BACKLOG.md](docs/BACKLOG.md): deferred work and limitations.
-- [HANDOFF.md](docs/HANDOFF.md): migration entry point.
+- [HANDOFF.md](docs/HANDOFF.md): earlier Cloud export with a pointer to current integration notes.
 - [EMPLOYEES_DECISIONS.md](docs/EMPLOYEES_DECISIONS.md) and [USERAPI_DECISIONS.md](docs/USERAPI_DECISIONS.md): focused module notes.
 
-All five implemented sections share navigation/theme. Other sections will be expanded in the same app. A server solution selectable in the header is approved future work, not implemented here. No agent configuration or deployment is included.
+Cloud's five implemented sections and the three On-Prem sections share the Cloud shell and theme. Other Cloud sections remain placeholders. The server administration mode is available through the header selector.
 
 ## Validation
 
-Production build, 12 model tests and five static section renders pass. Employee pagination, email search and new guests were checked in the browser. See HANDOFF.md for exact coverage and BACKLOG.md for outstanding QA. Vite still warns about a JS chunk above 500 kB.
+The current production build, 22 model tests and 10 static/routed renders pass. See [INTEGRATION.md](docs/INTEGRATION.md) for prior browser coverage and limitations. Vite still warns about a JS chunk above 500 kB.

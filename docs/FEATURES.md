@@ -7,8 +7,8 @@ Fixed header, grouped sidebar, responsive navigation drawer, remembered light/da
 ## Employees
 
 - Four tabs: all employees, join requests, invitations and settings.
-- Immutable seed of 74 records: 69 user-supplied Russian names plus five fictional guests. Original names are used only to derive email aliases; series/band labels are not imported.
-- Default status counts: 66 active, four invited, four requested. Active records include three administrators (including the owner), 58 regular employees and five guests.
+- Immutable seed of 200 records: the original 74 records (69 curated Russian names and five fictional guests) plus 126 fixed, Cyrillic-display fictional characters. Original Latin names for new characters are used only to derive email aliases.
+- Default status counts: 192 active, four invited, four requested. Active records include three administrators (including the owner), 184 regular employees and five guests.
 - Administrators, employees and guests are grouped in that order before pagination. Letter avatars only.
 - Search by name/email, select individual records or selectable records on the current page. Owner cannot be removed.
 - Page sizes 12 (default), 25, 50 and 100, numbered pages, previous/next and visible range. Search, tab and page-size changes return to page 1. Page changes clear selection. A deleted last page clamps to the remaining page count. Section remount resets pagination preferences.

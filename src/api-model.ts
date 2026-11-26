@@ -36,8 +36,8 @@ export function expiryDate(days: number) { return new Date(Date.now() + days * 8
 export function displayDate(value: string, time = false) {
   return new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', ...(time ? { hour: '2-digit', minute: '2-digit', second: '2-digit' } : {}), timeZone: 'Europe/Moscow' }).format(new Date(value));
 }
-export function auditEvent(data: Omit<AuditEvent, 'id' | 'at' | 'organization' | 'requestId'>): AuditEvent {
-  return { ...data, id: crypto.randomUUID(), at: new Date().toISOString(), organization: ORGANIZATION, requestId: crypto.randomUUID() };
+export function auditEvent(data: Omit<AuditEvent, 'id' | 'at' | 'organization' | 'requestId'>, organization = ORGANIZATION): AuditEvent {
+  return { ...data, id: crypto.randomUUID(), at: new Date().toISOString(), organization, requestId: crypto.randomUUID() };
 }
 export async function generateDemoSecret() {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
@@ -81,11 +81,11 @@ export function loadApiState(): ApiState {
   return initialApiState();
 }
 
-export function keyAudit(key: ApiKey, operation: string, changes: AuditEvent['changes'] = []) {
-  return auditEvent({ source: 'cabinet', category: 'keys', integrationId: key.id, integrationName: key.name, responsible: key.creatorName, actor: CURRENT_ADMIN.name, operation, target: key.name, result: 'success', changes });
+export function keyAudit(key: ApiKey, operation: string, changes: AuditEvent['changes'] = [], organization = ORGANIZATION) {
+  return auditEvent({ source: 'cabinet', category: 'keys', integrationId: key.id, integrationName: key.name, responsible: key.creatorName, actor: CURRENT_ADMIN.name, operation, target: key.name, result: 'success', changes }, organization);
 }
 
-export function transitionApiKey(state: ApiState, id: string, action: 'enable' | 'disable' | 'rotate' | 'delete', generated: Awaited<ReturnType<typeof generateDemoSecret>> | null = null, days = 90): ApiState {
+export function transitionApiKey(state: ApiState, id: string, action: 'enable' | 'disable' | 'rotate' | 'delete', generated: Awaited<ReturnType<typeof generateDemoSecret>> | null = null, days = 90, organization = ORGANIZATION): ApiState {
   const key = state.keys.find(k => k.id === id);
   if (!key) throw new Error('Ключ не найден');
   if (action === 'enable' && keyStatus(key) === 'expired') throw new Error('Срок действия истёк. Сбросьте ключ.');
@@ -99,13 +99,13 @@ export function transitionApiKey(state: ApiState, id: string, action: 'enable' |
     keys: action === 'delete' ? state.keys.filter(k => k.id !== id) : state.keys.map(k => k.id !== id ? k : action === 'rotate'
       ? { ...k, fingerprint: generated!.fingerprint, ...(k.kind === 'secure' ? { secretHash: generated!.hash, expiresAt } : { legacyValue: generated!.value }) }
       : { ...k, enabled: action === 'enable' }),
-    events: [keyAudit(key, operations[action], changes), ...state.events],
+    events: [keyAudit(key, operations[action], changes, organization), ...state.events],
   };
 }
 
-export function changeAdminAccess(state: ApiState, id: string, allowed: boolean): ApiState {
+export function changeAdminAccess(state: ApiState, id: string, allowed: boolean, organization = ORGANIZATION): ApiState {
   const admin = state.admins.find(a => a.id === id);
   if (!admin || admin.owner || admin.allowed === allowed) return state;
-  return { ...state, admins: state.admins.map(a => a.id === id ? { ...a, allowed } : a), events: [auditEvent({ source: 'cabinet', category: 'access', integrationId: null, integrationName: null, responsible: null, actor: CURRENT_ADMIN.name, operation: allowed ? 'Выдача полномочия' : 'Отзыв полномочия', target: admin.name, result: 'success', changes: [{ field: API_PERMISSION, before: admin.allowed ? 'Есть' : 'Нет', after: allowed ? 'Есть' : 'Нет' }] }), ...state.events] };
+  return { ...state, admins: state.admins.map(a => a.id === id ? { ...a, allowed } : a), events: [auditEvent({ source: 'cabinet', category: 'access', integrationId: null, integrationName: null, responsible: null, actor: CURRENT_ADMIN.name, operation: allowed ? 'Выдача полномочия' : 'Отзыв полномочия', target: admin.name, result: 'success', changes: [{ field: API_PERMISSION, before: admin.allowed ? 'Есть' : 'Нет', after: allowed ? 'Есть' : 'Нет' }] }, organization), ...state.events] };
 }
 

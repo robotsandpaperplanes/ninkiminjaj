@@ -1,5 +1,6 @@
+import { Dialog } from './app/ModeVisibility';
 import { useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Box, Button, DialogActions, DialogContent, DialogTitle, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import type { RoleChange } from './role-catalog';
 export default function RoleChangeImpact({ changes, count }: { changes: RoleChange[]; count: number }) {
   const [open, setOpen] = useState(false);

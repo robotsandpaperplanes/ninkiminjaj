@@ -1,0 +1,1571 @@
+<!doctype html>
+<html lang="en" data-visualize-standalone>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Function Management History</title>
+<style>:root {
+  color-scheme: light dark;
+  background-color: transparent !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: var(
+    --main-surface-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: light-dark(rgb(26 28 31), rgb(255 255 255));
+  --card: color-mix(in oklab, var(--foreground) 5%, transparent);
+  --card-foreground: var(--foreground);
+  --popover: light-dark(rgb(255 255 255), rgb(45 45 45));
+  --popover-foreground: var(--foreground);
+  --primary: light-dark(rgb(51 156 255), rgb(131 195 255));
+  --primary-foreground: light-dark(rgb(255 255 255), rgb(13 13 13));
+  --secondary: light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%));
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: light-dark(
+    rgb(26 28 31 / 49.4%),
+    rgb(255 255 255 / 49.8%)
+  );
+  --accent: light-dark(rgb(229 242 255), rgb(13 39 63));
+  --accent-foreground: var(--primary);
+  --destructive: light-dark(rgb(226 85 7), rgb(255 133 73));
+  --border: light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%));
+  --input: light-dark(
+    rgb(26 28 31 / 11.8%),
+    color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+  );
+  --ring: light-dark(rgb(51 156 255), rgb(131 195 255 / 76%));
+  --font-size-base: 14px;
+  --red: light-dark(rgb(186 38 35), rgb(250 66 62));
+  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans: -apple-system, system-ui, "Segoe UI", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 430;
+  --font-weight-medium: 500;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --radius: 10px;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z'/%3E%3C/svg%3E");
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+  --color-background-primary: var(--background);
+  --color-text-primary: var(--foreground);
+  --color-border-secondary: var(--border);
+}
+
+:root[data-visualize-standalone] {
+  background-color: var(--background) !important;
+}
+
+/* Generic mobile code-block hosts provide light/dark mode but no series palette.
+   AppBlock hosts set all six variables themselves. */
+:root:not([data-app-block-surface]) {
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(#f3883b, #f59a56);
+  --viz-series-3: light-dark(#5dc977, #74d58b);
+  --viz-series-4: light-dark(#eb77b1, #f08fc0);
+  --viz-series-5: light-dark(#9b79ec, #aa91ef);
+  --viz-series-6: light-dark(#3ab9b1, #5acbc2);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html > body {
+  margin: 0;
+  padding: 5px;
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+}
+
+:root:not([data-app-block-surface]) > body {
+  padding: 12px;
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+}
+
+b,
+strong,
+th {
+  font-weight: var(--font-weight-medium);
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+}
+
+.table :is(th, td) {
+  padding-block: 10px;
+  padding-inline: 0 24px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.table-responsive > .table :is(th, td) {
+  overflow-wrap: break-word;
+}
+
+.table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.table :is(caption, thead th) {
+  font-weight: 600;
+}
+
+.table thead th {
+  padding-block: 8px;
+  border-bottom-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+
+.table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.table.table-sm :is(th, td) {
+  padding-block: 6px;
+}
+
+.table.table-sm :is(th, td):not(:last-child) {
+  padding-inline-end: 16px;
+}
+
+.table :is(.text-end, [align="right"]) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table :is(.text-center, [align="center"]) {
+  text-align: center;
+}
+
+.table .text-nowrap {
+  white-space: nowrap;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+#widget > :not(.card) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  box-shadow: none;
+  font-size: var(--font-size-tooltip);
+  line-height: var(--line-height-tooltip);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* The bundled tooltip runtime owns [data-tooltip]. AppBlock's CSS-only
+   pseudo-tooltip can widen dense grids even while hidden. */
+main [data-tooltip]::after {
+  content: none;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.viz-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  color: var(--accent-foreground);
+  background: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+small,
+.text-small,
+.viz-badge {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls > .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls > .form-label > :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+.btn {
+  appearance: button;
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.btn:is(.btn-block, .viz-tile) {
+  inline-size: 100%;
+}
+
+.btn.viz-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+a.btn {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: var(--interactive-label-primary-default, var(--primary-foreground));
+  background: var(--interactive-bg-primary-default, var(--foreground));
+  background-clip: padding-box;
+}
+
+.btn-primary .text-muted {
+  color: color-mix(
+    in srgb,
+    var(--interactive-label-primary-default, var(--primary-foreground)) 50%,
+    transparent
+  );
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: padding-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--foreground);
+  background: var(--secondary);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+.form-control[type="file"] {
+  padding: 0;
+  overflow: hidden;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control[type="file"]::file-selector-button {
+  min-height: 26px;
+  margin-right: 8px;
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--input);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: inherit;
+  font: inherit;
+}
+
+.form-control[type="file"]:not(:disabled):hover::file-selector-button {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-control-color[type="color"] {
+  width: 40px;
+  height: 28px;
+  padding: 3px;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 4px);
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 32px 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
+    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-select:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-check {
+  display: flex;
+  min-height: 20px;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"] {
+  border-color: var(--input);
+  border-radius: var(--radius-sm);
+  background-color: var(--secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: "";
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+}
+
+.form-check-input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.form-check-input[type="radio"]:checked {
+  border: 2px solid var(--primary);
+  background:
+    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
+    var(--primary);
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+  box-shadow: var(--shadow-sm);
+  content: "";
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--primary);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: 0;
+  accent-color: var(--primary);
+  background: linear-gradient(
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 7%, transparent)
+    )
+    center / 100% 2px no-repeat;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-webkit-slider-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+    [aria-pressed="true"],
+    [aria-selected="true"],
+    .is-selected
+  ) {
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+.btn.viz-tile:is([aria-pressed="true"], [aria-selected="true"], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget > svg {
+  width: 100%;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+</style>
+</head>
+<body>
+<div id="function-management-prototype" class="fm-app">
+  <style>
+    #function-management-prototype {
+      --fm-purple: color-mix(in srgb, var(--primary) 58%, #8700ff);
+      --fm-purple-strong: color-mix(in srgb, var(--primary) 34%, #8700ff);
+      --fm-purple-soft: color-mix(in srgb, var(--primary) 16%, var(--background));
+      --fm-red: var(--red);
+      --fm-gray-bg: color-mix(in srgb, var(--muted) 34%, var(--background));
+      --fm-gray-line: var(--border);
+      position: relative;
+      min-height: 700px;
+      color: var(--foreground);
+      background: var(--background);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    #function-management-prototype * { box-sizing: border-box; }
+
+    #function-management-prototype .fm-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 58px;
+      padding: 8px 22px;
+      background: var(--card);
+      border-bottom: 1px solid var(--fm-gray-line);
+      box-shadow: inset 0 3px 0 var(--fm-purple);
+    }
+
+    #function-management-prototype .fm-brand,
+    #function-management-prototype .fm-brand-copy,
+    #function-management-prototype .fm-top-actions,
+    #function-management-prototype .fm-action-line,
+    #function-management-prototype .fm-radio-group,
+    #function-management-prototype .fm-submit-wrap {
+      display: flex;
+      align-items: center;
+    }
+
+    #function-management-prototype .fm-brand { gap: 12px; }
+    #function-management-prototype .fm-brand-copy { gap: 18px; }
+
+    #function-management-prototype .fm-logo {
+      display: inline-grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      color: var(--fm-red);
+      font-weight: 500;
+      border: 3px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 2px 2px 8px 2px;
+    }
+
+    #function-management-prototype .fm-brand-name { font-weight: 500; }
+
+    #function-management-prototype .fm-top-actions {
+      gap: 10px;
+      color: var(--muted-foreground);
+    }
+
+    #function-management-prototype .fm-tariff {
+      padding: 7px 12px;
+      color: var(--foreground);
+      border: 1px solid var(--fm-gray-line);
+      border-radius: 3px;
+    }
+
+    #function-management-prototype .fm-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--muted-foreground);
+    }
+
+    #function-management-prototype .fm-shell {
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr);
+      min-height: 642px;
+    }
+
+    #function-management-prototype .fm-sidebar {
+      padding-top: 10px;
+      background: var(--fm-purple-soft);
+      border-right: 1px solid var(--fm-gray-line);
+    }
+
+    #function-management-prototype .fm-nav { display: grid; }
+
+    #function-management-prototype .fm-nav a {
+      padding: 12px 22px;
+      color: var(--foreground);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+
+    #function-management-prototype .fm-nav a[aria-current="page"] {
+      color: var(--primary-foreground);
+      background: var(--fm-purple);
+      border-left-color: var(--fm-purple);
+      font-weight: 500;
+    }
+
+    #function-management-prototype .fm-main {
+      min-width: 0;
+      padding: 32px 32px 44px;
+    }
+
+    #function-management-prototype .fm-title {
+      margin: 0 0 6px;
+      font-weight: 500;
+      color: var(--fm-purple-strong);
+    }
+
+    #function-management-prototype .fm-lead,
+    #function-management-prototype .fm-table-note {
+      margin: 0;
+      color: var(--muted-foreground);
+    }
+
+    #function-management-prototype .fm-actions {
+      margin-top: 26px;
+      border-top: 3px solid var(--fm-purple);
+      background: var(--fm-purple-soft);
+    }
+
+    #function-management-prototype .fm-action-line {
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 62px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--fm-gray-line);
+    }
+
+    #function-management-prototype .fm-action-title {
+      margin: 0 0 3px;
+      font-weight: 500;
+      color: var(--fm-purple-strong);
+    }
+
+    #function-management-prototype .fm-action-copy {
+      margin: 0;
+      color: var(--muted-foreground);
+    }
+
+    #function-management-prototype .fm-action-trigger { min-width: 238px; }
+    #function-management-prototype .fm-section { margin-top: 32px; }
+
+    #function-management-prototype .fm-section h3 {
+      margin: 0 0 6px;
+      font-weight: 500;
+      color: var(--fm-purple-strong);
+    }
+
+    #function-management-prototype .fm-table-note { margin-bottom: 14px; }
+    #function-management-prototype .fm-code { overflow-wrap: anywhere; }
+    #function-management-prototype .fm-status { font-weight: 500; }
+    #function-management-prototype .fm-status-on { color: var(--green); }
+    #function-management-prototype .fm-status-off { color: var(--destructive); }
+
+    #function-management-prototype .fm-message {
+      margin-top: 16px;
+      padding: 10px 12px;
+      color: var(--card-foreground);
+      background: color-mix(in srgb, var(--green) 11%, var(--card));
+      border-left: 3px solid var(--green);
+    }
+
+    #function-management-prototype .fm-message[hidden],
+    #function-management-prototype .fm-modal-layer[hidden],
+    #function-management-prototype .fm-user-field[hidden],
+    #function-management-prototype .fm-error[hidden] { display: none; }
+
+    #function-management-prototype .fm-modal-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: color-mix(in srgb, var(--foreground) 48%, transparent);
+    }
+
+    #function-management-prototype .fm-dialog {
+      width: min(500px, 100%);
+      color: var(--card-foreground);
+    }
+
+    #function-management-prototype .fm-dialog-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    #function-management-prototype .fm-dialog h3,
+    #function-management-prototype .fm-dialog p { margin: 0; }
+
+    #function-management-prototype .fm-dialog p {
+      margin-top: 5px;
+      color: var(--muted-foreground);
+    }
+
+    #function-management-prototype .fm-form {
+      display: grid;
+      gap: 15px;
+    }
+
+    #function-management-prototype .fm-radio-group {
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 7px;
+    }
+
+    #function-management-prototype .fm-submit-wrap {
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    #function-management-prototype .fm-error { color: var(--destructive); }
+
+    #function-management-prototype .fm-btn-primary {
+      color: var(--primary-foreground);
+      background: var(--fm-purple);
+      border-color: var(--fm-purple);
+    }
+
+    #function-management-prototype .fm-dialog {
+      border-top: 4px solid var(--fm-purple);
+    }
+
+    @media (max-width: 720px) {
+      #function-management-prototype .fm-shell { grid-template-columns: 1fr; }
+
+      #function-management-prototype .fm-sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--fm-gray-line);
+      }
+
+      #function-management-prototype .fm-nav a:not([aria-current="page"]) { display: none; }
+      #function-management-prototype .fm-main { padding: 24px 16px 32px; }
+
+      #function-management-prototype .fm-action-line {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      #function-management-prototype .fm-action-trigger { min-width: 0; }
+      #function-management-prototype .fm-brand-copy > span:last-child,
+      #function-management-prototype .fm-tariff { display: none; }
+    }
+  </style>
+
+  <header class="fm-topbar">
+    <div class="fm-brand">
+      <span class="fm-logo" aria-hidden="true">L</span>
+      <div class="fm-brand-copy">
+        <span class="fm-brand-name">МТС Линк</span>
+        <span>Администрирование</span>
+      </div>
+    </div>
+    <div class="fm-top-actions" aria-hidden="true">
+      <span class="fm-tariff">МОЙ ТАРИФ⌄</span>
+      <span>⌕</span>
+      <span>▦</span>
+      <span class="fm-avatar"></span>
+    </div>
+  </header>
+
+  <div class="fm-shell">
+    <aside class="fm-sidebar" aria-label="Разделы администрирования">
+      <nav class="fm-nav">
+        <a href="#">Аккаунты</a>
+        <a href="#">Брендирование</a>
+        <a href="#">Безопасность</a>
+        <a href="#">Серверы</a>
+        <a href="#">SMTP</a>
+        <a href="#">Логи</a>
+        <a href="#" aria-current="page">Управление функционалом</a>
+        <a href="#">Лицензии</a>
+        <a href="#">Сертификаты</a>
+      </nav>
+    </aside>
+
+    <main class="fm-main">
+      <h2 class="fm-title">Управление функционалом</h2>
+      <p class="fm-lead">Включение и отключение поддерживаемых функций для организации или отдельного пользователя. Доступность зависит от продукта, лицензии и уровня действия.</p>
+
+      <div class="fm-message" style="display:block;margin-top:14px;background:var(--card);border-left-color:var(--primary)">Прототип: список разрешённых фич, приоритет пользовательских и организационных настроек и зависимость от лицензии требуют согласования. Неподдерживаемые фичи не должны применяться в реальном продукте.</div><section class="fm-actions" aria-label="Действия с функционалом">
+        <div class="fm-action-line">
+          <div>
+            <p class="fm-action-title">Активировать функциональность</p>
+            <p class="fm-action-copy text-small">Выберите продукт, поддерживаемую фичу и уровень применения.</p>
+          </div>
+          <button type="button" class="btn fm-btn-primary fm-action-trigger" data-action="enable">АКТИВИРОВАТЬ ФУНКЦИОНАЛЬНОСТЬ</button>
+        </div>
+        <div class="fm-action-line">
+          <div>
+            <p class="fm-action-title">Деактивировать функциональность</p>
+            <p class="fm-action-copy text-small">Отключите фичу для организации или конкретного пользователя.</p>
+          </div>
+          <button type="button" class="btn fm-btn-primary fm-action-trigger" data-action="disable">ДЕАКТИВИРОВАТЬ ФУНКЦИОНАЛЬНОСТЬ</button>
+        </div>
+      </section>
+
+      <div class="fm-message" id="fm-message" role="status" hidden></div>
+
+      <section class="fm-section" aria-labelledby="fm-current-heading">
+        <h3 id="fm-current-heading">История изменений функционала</h3>
+        <p class="fm-table-note text-small">Пример истории изменений в прототипе. Последнее действие для указанного продукта, фичи и уровня отмечено как актуальное. Реальное сохранение в системе требует разработки.</p>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Продукт</th>
+                <th scope="col">Фича</th>
+                <th scope="col">Статус функциональности</th>
+                <th scope="col">Уровень</th>
+                <th scope="col">Email</th>
+                <th scope="col" class="text-nowrap">Изменено</th>
+                <th scope="col">Статус записи</th>
+              </tr>
+            </thead>
+            <tbody id="fm-state-body">
+              <tr data-key="Чаты|meetingToChatCall|Организация|">
+                <td>Чаты</td><td><code class="fm-code">meetingToChatCall</code></td><td><span class="fm-status fm-status-on">Включена</span></td><td>Организация</td><td>—</td><td class="text-nowrap">12.08.2026 15:42</td><td><span class="viz-badge">Актуальная</span></td>
+              </tr>
+              <tr data-key="Чаты|autoBroadcatingOnCalls|Организация|">
+                <td>Чаты</td><td><code class="fm-code">autoBroadcatingOnCalls</code></td><td><span class="fm-status fm-status-off">Отключена</span></td><td>Организация</td><td>—</td><td class="text-nowrap">12.08.2026 14:18</td><td><span class="viz-badge">Актуальная</span></td>
+              </tr>
+              <tr data-key="Встречи|useSipCalls|Организация|">
+                <td>Встречи</td><td><code class="fm-code">useSipCalls</code></td><td><span class="fm-status fm-status-on">Включена</span></td><td>Организация</td><td>—</td><td class="text-nowrap">11.08.2026 10:06</td><td><span class="viz-badge">Актуальная</span></td>
+              </tr>
+              <tr data-key="Встречи|useSipCalls|Организация|">
+                <td>Встречи</td><td><code class="fm-code">useSipCalls</code></td><td><span class="fm-status fm-status-off">Отключена</span></td><td>Организация</td><td>—</td><td class="text-nowrap">08.08.2026 18:31</td><td><span class="text-muted">Архивная</span></td>
+              </tr>
+              <tr data-key="Встречи|useSipSettings|Организация|">
+                <td>Встречи</td><td><code class="fm-code">useSipSettings</code></td><td><span class="fm-status fm-status-off">Отключена</span></td><td>Организация</td><td>—</td><td class="text-nowrap">10.08.2026 17:24</td><td><span class="viz-badge">Актуальная</span></td>
+              </tr>
+              <tr data-key="Встречи|exchangeCalendarSync|Пользователь|ivanov@example.ru">
+                <td>Встречи</td><td><code class="fm-code">exchangeCalendarSync</code></td><td><span class="fm-status fm-status-on">Включена</span></td><td>Пользователь</td><td>ivanov@example.ru</td><td class="text-nowrap">12.08.2026 16:15</td><td><span class="viz-badge">Актуальная</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="fm-modal-layer" id="fm-modal-layer" hidden>
+    <section class="card fm-dialog" role="dialog" aria-modal="true" aria-labelledby="fm-dialog-title" aria-describedby="fm-dialog-copy">
+      <div class="fm-dialog-header">
+        <div>
+          <h3 id="fm-dialog-title">Активировать функциональность</h3>
+          <p id="fm-dialog-copy">Выберите продукт, поддерживаемую фичу и уровень применения.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" id="fm-close" aria-label="Закрыть">×</button>
+      </div>
+
+      <form class="fm-form" id="fm-form" novalidate>
+        <label class="form-label" for="fm-product">Продукт
+          <select class="form-select" id="fm-product"><option value="Встречи">Встречи</option><option value="Чаты">Чаты</option></select>
+        </label>
+        <label class="form-label" for="fm-feature">Название фичи<input class="form-control" id="fm-feature" type="text" placeholder="Техническое имя из согласованного перечня" autocomplete="off"></label>
+        <fieldset>
+          <legend>Уровень</legend>
+          <div class="fm-radio-group">
+            <label class="form-check" for="fm-level-org"><input class="form-check-input" type="radio" name="fm-level" id="fm-level-org" value="Организация" checked><span class="form-check-label">Организация</span></label>
+            <label class="form-check" for="fm-level-user"><input class="form-check-input" type="radio" name="fm-level" id="fm-level-user" value="Пользователь"><span class="form-check-label">Пользователь</span></label>
+          </div>
+        </fieldset>
+        <label class="form-label fm-user-field" id="fm-user-field" for="fm-email" hidden>Email пользователя<input class="form-control" id="fm-email" type="email" placeholder="user@example.ru" autocomplete="off"></label>
+        <div class="fm-error text-small" id="fm-error" role="alert" hidden></div>
+        <div class="fm-submit-wrap">
+          <button type="button" class="btn btn-ghost" id="fm-cancel">ОТМЕНА</button>
+          <button type="submit" class="btn fm-btn-primary" id="fm-submit">АКТИВИРОВАТЬ</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.getElementById("function-management-prototype");
+      var modal = root.querySelector("#fm-modal-layer");
+      var form = root.querySelector("#fm-form");
+      var product = root.querySelector("#fm-product");
+      var feature = root.querySelector("#fm-feature");
+      var email = root.querySelector("#fm-email");
+      var userField = root.querySelector("#fm-user-field");
+      var error = root.querySelector("#fm-error");
+      var title = root.querySelector("#fm-dialog-title");
+      var copy = root.querySelector("#fm-dialog-copy");
+      var submit = root.querySelector("#fm-submit");
+      var message = root.querySelector("#fm-message");
+      var stateBody = root.querySelector("#fm-state-body");
+      var action = "enable";
+
+      function selectedLevel() { return root.querySelector('input[name="fm-level"]:checked').value; }
+
+      function updateUserField() {
+        var isUser = selectedLevel() === "Пользователь";
+        userField.hidden = !isUser;
+        if (!isUser) email.value = "";
+      }
+
+      function openDialog(nextAction) {
+        action = nextAction;
+        var enable = action === "enable";
+        title.textContent = enable ? "Активировать функциональность" : "Деактивировать функциональность";
+        copy.textContent = enable ? "Выберите продукт, поддерживаемую фичу и уровень применения." : "Выберите продукт, поддерживаемую фичу и проверьте уровень применения.";
+        submit.textContent = enable ? "АКТИВИРОВАТЬ" : "ДЕАКТИВИРОВАТЬ";
+        error.hidden = true;
+        modal.hidden = false;
+        product.focus();
+      }
+
+      function closeDialog() {
+        modal.hidden = true;
+        form.reset();
+        updateUserField();
+        error.hidden = true;
+      }
+
+      function formatDate(value) {
+        return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(value).replace(",", "");
+      }
+
+      function makeCell(text, className) {
+        var td = document.createElement("td");
+        if (className) td.className = className;
+        td.textContent = text;
+        return td;
+      }
+
+      function applyState() {
+        var level = selectedLevel();
+        var targetEmail = level === "Пользователь" ? email.value.trim() : "";
+        var key = [product.value, feature.value, level, targetEmail].join("|");
+        var enable = action === "enable";
+        var date = formatDate(new Date());
+        var previous = Array.from(stateBody.rows).find(function (candidate) { return candidate.dataset.key === key; });
+        if (previous && previous.cells[6]) {
+          previous.cells[6].textContent = "Архивная";
+          previous.cells[6].className = "text-muted";
+        }
+        var row = document.createElement("tr");
+        row.dataset.key = key;
+        var codeCell = document.createElement("td");
+        var code = document.createElement("code");
+        var statusCell = document.createElement("td");
+        var newStatus = document.createElement("span");
+        code.className = "fm-code";
+        code.textContent = feature.value;
+        codeCell.appendChild(code);
+        newStatus.className = "fm-status " + (enable ? "fm-status-on" : "fm-status-off");
+        newStatus.textContent = enable ? "Включена" : "Отключена";
+        statusCell.appendChild(newStatus);
+        row.appendChild(makeCell(product.value));
+        row.appendChild(codeCell);
+        row.appendChild(statusCell);
+        row.appendChild(makeCell(level));
+        row.appendChild(makeCell(targetEmail || "—"));
+        row.appendChild(makeCell(date, "text-nowrap"));
+        var recordCell = document.createElement("td");
+        var badge = document.createElement("span");
+        badge.className = "viz-badge";
+        badge.textContent = "Актуальная";
+        recordCell.appendChild(badge);
+        row.appendChild(recordCell);
+        stateBody.insertBefore(row, stateBody.firstChild);
+
+        message.textContent = "В историю добавлена запись: фича «" + feature.value + "» " + (enable ? "включена" : "отключена") + ".";
+        message.hidden = false;
+      }
+
+      root.querySelectorAll("[data-action]").forEach(function (button) { button.addEventListener("click", function () { openDialog(button.dataset.action); }); });
+      root.querySelector("#fm-close").addEventListener("click", closeDialog);
+      root.querySelector("#fm-cancel").addEventListener("click", closeDialog);
+      modal.addEventListener("click", function (event) { if (event.target === modal) closeDialog(); });
+      root.querySelectorAll('input[name="fm-level"]').forEach(function (radio) { radio.addEventListener("change", updateUserField); });
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var featureName = feature.value.trim();
+        if (!featureName) {
+          error.textContent = "Введите название фичи.";
+          error.hidden = false;
+          feature.focus();
+          return;
+        }
+        if (selectedLevel() === "Пользователь" && (!email.value.trim() || !email.checkValidity())) {
+          error.textContent = "Укажите корректный email пользователя.";
+          error.hidden = false;
+          email.focus();
+          return;
+        }
+        applyState();
+        closeDialog();
+      });
+
+      updateUserField();
+    }());
+  </script>
+</div>
+
+<script id="codex-visualization-floating-ui-core" src="https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js"></script>
+<script id="codex-visualization-floating-ui-dom" src="https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js"></script>
+<script id="codex-visualization-lucide" async src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js"></script>
+<script id="codex-visualization-tooltip">/* oxlint-disable typescript/no-unsafe-argument, typescript/no-unsafe-call, typescript/no-unsafe-return */
+// Runs inside the visualization sandbox, not the host webview.
+(() => {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set(["top", "right", "bottom", "left"]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+
+  const getTrigger = (target) =>
+    target?.nodeType === Node.ELEMENT_NODE
+      ? target.closest("[data-tooltip]")
+      : null;
+  const containsTarget = (trigger, target) =>
+    target?.nodeType != null && trigger.contains(target);
+  const getContent = (trigger) =>
+    trigger.getAttribute("data-tooltip")?.trim() ?? "";
+  const getPlacement = (trigger) => {
+    const placement = trigger.getAttribute("data-tooltip-placement");
+    return tooltipPlacements.has(placement) ? placement : "top";
+  };
+  const getTooltip = () => {
+    if (tooltip == null) {
+      tooltip = document.createElement("div");
+      tooltip.id = tooltipId;
+      tooltip.className = "tooltip";
+      tooltip.setAttribute("role", "tooltip");
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) => {
+    const ids = new Set(
+      (trigger.getAttribute("aria-describedby") ?? "")
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute("aria-describedby");
+    } else {
+      trigger.setAttribute("aria-describedby", [...ids].join(" "));
+    }
+  };
+  const clearOpenTimeout = () => {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) => {
+    clearOpenTimeout();
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) => {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              "--tooltip-available-width",
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              "--tooltip-available-height",
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: "fixed",
+    })
+      .then(({ x, y }) => {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = "visible";
+      })
+      .catch(() => {
+        if (activeTrigger === trigger && request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) => {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = "hidden";
+    floating.style.transform = "translate(0, 0)";
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () => {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) => {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() < skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() => {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handleLeave = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger?.matches(":focus-visible")) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) => {
+    const trigger = getTrigger(event.target);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const destroy = () => {
+    closeTooltip(false);
+    document.removeEventListener("pointerover", handlePointerOpen);
+    document.removeEventListener("pointerout", handleLeave);
+    document.removeEventListener("focusin", handleFocusIn);
+    document.removeEventListener("focusout", handleLeave);
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("contextmenu", handleContextMenu);
+    tooltip = null;
+  };
+
+  document.addEventListener("pointerover", handlePointerOpen);
+  document.addEventListener("pointerout", handleLeave);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("focusout", handleLeave);
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("contextmenu", handleContextMenu);
+  window.addEventListener("pagehide", destroy, { once: true });
+})();
+</script>
+<script id="codex-visualization-lucide-initialization">(() => {
+  const initialize = () => {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById("codex-visualization-lucide")
+    ?.addEventListener("load", initialize, { once: true });
+})();
+</script>
+</body>
+</html>

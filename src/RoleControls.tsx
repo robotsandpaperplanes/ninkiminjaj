@@ -1,3 +1,4 @@
+import { Dialog, TextField } from './app/ModeVisibility';
 import { PermissionRow } from './PermissionControl';
 import { permissionState, productState, adminState, preferenceState, recordingValue, withRecordingAccess, type RoleState } from './role-states';
 import { roleSections, roleProducts, roleAdminRights, rightEnabled, rightScope } from './role-catalog';
@@ -5,7 +6,7 @@ import RoleTypeSelect from './RoleTypeSelect';
 import { PreviewChat } from './PreviewChat';
 import { RoleExplanation } from './RoleExplanation';
 import { useState, type ReactNode } from 'react';
-import { Alert, Box, Button, Chip, Dialog, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, MenuItem, Paper, Stack, Switch, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, DialogContent, DialogTitle, Divider, IconButton, InputAdornment, MenuItem, Paper, Stack, Switch, Typography } from '@mui/material';
 import { CloseOutlined, SearchOutlined, VisibilityOutlined } from '@mui/icons-material';
 import { productLabels, type Permissions } from './group-model';
 import { quotaCatalog, type BooleanPermission, type RoleConfig, type RolePreferences, everyoneSettings } from './role-model';

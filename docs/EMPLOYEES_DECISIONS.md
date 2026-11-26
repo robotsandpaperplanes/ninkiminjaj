@@ -1,5 +1,13 @@
 # Employees module decisions
 
+## Dataset expansion
+
+The current primary Cloud employee seed has 200 records: the original 74 records are unchanged and 126 fixed fictional identities were appended as `employee-075` through `employee-200`. All new display names are Cyrillic, with original Latin first/last spellings stored in the fixture definition for deterministic email generation. New records are ordinary active employees with initials avatars. The complete seed has 192 active, four invited and four requested records; five active guests, two administrators and one owner remain from the original set.
+
+The working-copy schema is version 3 under the existing storage key. Loading version 1 or 2 appends the new identities while preserving existing records, edits, approvals, settings and intentional deletions. Reset restores the 200-record seed. This expansion does not connect the Employees directory to the older independent group, role or API administrator fixtures. Blocked accounts, organizational team membership, profile photos and an inactivity-session timer have no supported model in this snapshot. No new permission or relationship semantics were inferred.
+
+The 22 November notes below describe the preserved original 74-record baseline and its earlier migration.
+
 Updated 22 November 2026. This note supersedes the initial 69-record/three-guest fixture description.
 
 ## Approved and implemented

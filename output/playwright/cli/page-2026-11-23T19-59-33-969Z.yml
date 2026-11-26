@@ -1,0 +1,230 @@
+- generic [ref=f5e3]:
+  - banner [ref=f5e4]:
+    - generic [ref=f5e5]:
+      - img "МТС Линк" [ref=f5e7]
+      - separator [ref=f5e8]
+      - generic [ref=f5e9]:
+        - paragraph [ref=f5e10]: Бизнес
+        - 'button "Режим администрирования: Облако" [ref=f5e11] [cursor=pointer]': Облако
+      - button "Тарифы" [ref=f5e15] [cursor=pointer]
+      - button "Включить светлую тему" [ref=f5e16] [cursor=pointer]
+      - button "Уведомления" [ref=f5e19] [cursor=pointer]
+      - generic "Сценарии прототипа" [ref=f5e22]:
+        - button "Сценарии прототипа" [ref=f5e23] [cursor=pointer]
+      - button "Профиль и оформление" [ref=f5e26] [cursor=pointer]
+  - navigation "Разделы админ-панели" [ref=f5e31]:
+    - generic [ref=f5e32]:
+      - generic [ref=f5e33]: Dunder Mifflin Paper Co
+      - list [ref=f5e34]:
+        - button "Организация" [ref=f5e35] [cursor=pointer]
+        - button "Сотрудники" [ref=f5e38] [cursor=pointer]
+        - button "Группы (сейчас)" [ref=f5e43] [cursor=pointer]
+        - button "Группы (мульти)" [ref=f5e46] [cursor=pointer]
+        - button "Роли" [ref=f5e49] [cursor=pointer]
+        - button "Федерации" [ref=f5e52] [cursor=pointer]
+    - generic [ref=f5e55]:
+      - separator [ref=f5e56]
+      - generic [ref=f5e57]: Управление
+      - list [ref=f5e58]:
+        - button "Журнал событий" [ref=f5e59] [cursor=pointer]
+        - button "Мониторинг" [ref=f5e62] [cursor=pointer]
+        - button "Безопасность" [ref=f5e65] [cursor=pointer]
+        - button "Интеграции" [ref=f5e68] [cursor=pointer]
+    - generic [ref=f5e71]:
+      - separator [ref=f5e72]
+      - generic [ref=f5e73]: Счета и платные функции
+      - list [ref=f5e74]:
+        - button "Тарифы" [ref=f5e75] [cursor=pointer]
+        - button "Брендирование" [ref=f5e78] [cursor=pointer]
+        - button "Платные мероприятия" [ref=f5e81] [cursor=pointer]
+        - button "Сертификат" [ref=f5e84] [cursor=pointer]
+    - generic [ref=f5e87]:
+      - separator [ref=f5e88]
+      - generic [ref=f5e89]: Администрирование
+      - list [ref=f5e90]:
+        - button "Аналитика" [ref=f5e91] [cursor=pointer]
+        - button "Устройства" [ref=f5e94] [cursor=pointer]
+        - button "API и вебхуки" [ref=f5e97] [cursor=pointer]
+        - button "SSO" [ref=f5e100] [cursor=pointer]
+        - button "SIEM" [ref=f5e103] [cursor=pointer]
+        - button "DLP" [ref=f5e106] [cursor=pointer]
+  - main [ref=f5e109]:
+    - generic [ref=f5e112]:
+      - generic [ref=f5e113]:
+        - heading "Сотрудники" [level=1] [ref=f5e114]
+        - generic [ref=f5e115]:
+          - button "Изменить тариф" [disabled]
+          - button "Экспорт" [ref=f5e116] [cursor=pointer]
+          - button "Настройки полей профиля" [ref=f5e117] [cursor=pointer]
+          - button "Добавить" [ref=f5e118] [cursor=pointer]
+      - tablist "Разделы сотрудников" [ref=f5e122]:
+        - tab "Все сотрудники" [selected] [ref=f5e123] [cursor=pointer]
+        - tab "Запросы на вступление · 4" [ref=f5e124] [cursor=pointer]
+        - tab "Приглашения · 4" [ref=f5e125] [cursor=pointer]
+        - tab "Настройки" [ref=f5e126] [cursor=pointer]
+      - tabpanel "Все сотрудники" [ref=f5e128]:
+        - generic [ref=f5e129]:
+          - generic [ref=f5e131]:
+            - textbox "Поиск сотрудников" [ref=f5e135]:
+              - /placeholder: Имя или email
+            - group [aria-hidden]
+          - paragraph [ref=f5e136]: "Найдено: 66"
+        - table "Сотрудники организации" [ref=f5e138]:
+          - rowgroup [ref=f5e139]:
+            - row [ref=f5e140]:
+              - columnheader "Выбрать всех на странице" [ref=f5e141]:
+                - generic "Выбрать всех на странице" [ref=f5e142] [cursor=pointer]:
+                  - checkbox [ref=f5e143]
+              - columnheader "Имя" [ref=f5e146]
+              - columnheader "Почта" [ref=f5e147]
+              - columnheader "Тариф" [ref=f5e148]
+          - rowgroup [ref=f5e149]:
+            - row [ref=f5e150]:
+              - cell [ref=f5e151]:
+                - paragraph [ref=f5e152]: Администраторы
+            - row [ref=f5e153]:
+              - cell [ref=f5e154]:
+                - 'checkbox "Выбрать: Фома Йоркин" [ref=f5e156] [cursor=pointer]'
+              - cell "ФЙ Фома Йоркин" [ref=f5e159]:
+                - generic [ref=f5e160]:
+                  - generic [ref=f5e161]: ФЙ
+                  - paragraph [ref=f5e163]: Фома Йоркин
+              - cell "t.yorke@dundermifflinpaper.com" [ref=f5e164]
+              - cell "Встречи FREE" [ref=f5e165]
+            - row [ref=f5e166]:
+              - 'cell "Выбрать: Эдуард Обрин" [ref=f5e167]':
+                - generic:
+                  - 'checkbox "Выбрать: Эдуард Обрин" [disabled]'
+              - cell "ЭО Эдуард Обрин Создатель организации" [ref=f5e168]:
+                - generic [ref=f5e169]:
+                  - generic [ref=f5e170]: ЭО
+                  - generic [ref=f5e171]:
+                    - paragraph [ref=f5e172]: Эдуард Обрин
+                    - paragraph [ref=f5e173]: Создатель организации
+              - cell "e.obrien@dundermifflinpaper.com" [ref=f5e174]
+              - cell "Встречи FREE" [ref=f5e175]
+            - row [ref=f5e176]:
+              - cell [ref=f5e177]:
+                - 'checkbox "Выбрать: Матвей Белламин" [ref=f5e179] [cursor=pointer]'
+              - cell "МБ Матвей Белламин" [ref=f5e182]:
+                - generic [ref=f5e183]:
+                  - generic [ref=f5e184]: МБ
+                  - paragraph [ref=f5e186]: Матвей Белламин
+              - cell "m.bellamy@dundermifflinpaper.com" [ref=f5e187]
+              - cell "Встречи FREE" [ref=f5e188]
+            - row [ref=f5e189]:
+              - cell [ref=f5e190]:
+                - paragraph [ref=f5e191]: Сотрудники
+            - row [ref=f5e192]:
+              - cell [ref=f5e193]:
+                - 'checkbox "Выбрать: Иван Зеленолесов" [ref=f5e195] [cursor=pointer]'
+              - cell "ИЗ Иван Зеленолесов" [ref=f5e198]:
+                - generic [ref=f5e199]:
+                  - generic [ref=f5e200]: ИЗ
+                  - paragraph [ref=f5e202]: Иван Зеленолесов
+              - cell "j.greenwood@dundermifflinpaper.com" [ref=f5e203]
+              - cell "Встречи FREE" [ref=f5e204]
+            - row [ref=f5e205]:
+              - cell [ref=f5e206]:
+                - 'checkbox "Выбрать: Николай Зеленолесов" [ref=f5e208] [cursor=pointer]'
+              - cell "НЗ Николай Зеленолесов" [ref=f5e211]:
+                - generic [ref=f5e212]:
+                  - generic [ref=f5e213]: НЗ
+                  - paragraph [ref=f5e215]: Николай Зеленолесов
+              - cell "c.greenwood@dundermifflinpaper.com" [ref=f5e216]
+              - cell "Встречи FREE" [ref=f5e217]
+            - row [ref=f5e218]:
+              - cell [ref=f5e219]:
+                - 'checkbox "Выбрать: Филипп Селиванов" [ref=f5e221] [cursor=pointer]'
+              - cell "ФС Филипп Селиванов" [ref=f5e224]:
+                - generic [ref=f5e225]:
+                  - generic [ref=f5e226]: ФС
+                  - paragraph [ref=f5e228]: Филипп Селиванов
+              - cell "p.selway@dundermifflinpaper.com" [ref=f5e229]
+              - cell "Встречи FREE" [ref=f5e230]
+            - row [ref=f5e231]:
+              - cell [ref=f5e232]:
+                - 'checkbox "Выбрать: Крис Стеноломов" [ref=f5e234] [cursor=pointer]'
+              - cell "КС Крис Стеноломов" [ref=f5e237]:
+                - generic [ref=f5e238]:
+                  - generic [ref=f5e239]: КС
+                  - paragraph [ref=f5e241]: Крис Стеноломов
+              - cell "c.wolstenholme@dundermifflinpaper.com" [ref=f5e242]
+              - cell "Встречи FREE" [ref=f5e243]
+            - row [ref=f5e244]:
+              - cell [ref=f5e245]:
+                - 'checkbox "Выбрать: Демьян Говоров" [ref=f5e247] [cursor=pointer]'
+              - cell "ДГ Демьян Говоров" [ref=f5e250]:
+                - generic [ref=f5e251]:
+                  - generic [ref=f5e252]: ДГ
+                  - paragraph [ref=f5e254]: Демьян Говоров
+              - cell "d.howard@dundermifflinpaper.com" [ref=f5e255]
+              - cell "Встречи FREE" [ref=f5e256]
+            - row [ref=f5e257]:
+              - cell [ref=f5e258]:
+                - 'checkbox "Выбрать: Вениамин Бутлеров" [ref=f5e260] [cursor=pointer]'
+              - cell "ВБ Вениамин Бутлеров" [ref=f5e263]:
+                - generic [ref=f5e264]:
+                  - generic [ref=f5e265]: ВБ
+                  - paragraph [ref=f5e267]: Вениамин Бутлеров
+              - cell "w.butler@dundermifflinpaper.com" [ref=f5e268]
+              - cell "Встречи FREE" [ref=f5e269]
+            - row [ref=f5e270]:
+              - cell [ref=f5e271]:
+                - 'checkbox "Выбрать: Регина Шоссейна" [ref=f5e273] [cursor=pointer]'
+              - cell "РШ Регина Шоссейна" [ref=f5e276]:
+                - generic [ref=f5e277]:
+                  - generic [ref=f5e278]: РШ
+                  - paragraph [ref=f5e280]: Регина Шоссейна
+              - cell "r.chassagne@dundermifflinpaper.com" [ref=f5e281]
+              - cell "Встречи FREE" [ref=f5e282]
+            - row [ref=f5e283]:
+              - cell [ref=f5e284]:
+                - 'checkbox "Выбрать: Родион Тростников-Парин" [ref=f5e286] [cursor=pointer]'
+              - cell "РТ Родион Тростников-Парин" [ref=f5e289]:
+                - generic [ref=f5e290]:
+                  - generic [ref=f5e291]: РТ
+                  - paragraph [ref=f5e293]: Родион Тростников-Парин
+              - cell "r.parry@dundermifflinpaper.com" [ref=f5e294]
+              - cell "Встречи FREE" [ref=f5e295]
+            - row [ref=f5e296]:
+              - cell [ref=f5e297]:
+                - 'checkbox "Выбрать: Тимофей Королёв" [ref=f5e299] [cursor=pointer]'
+              - cell "ТК Тимофей Королёв" [ref=f5e302]:
+                - generic [ref=f5e303]:
+                  - generic [ref=f5e304]: ТК
+                  - paragraph [ref=f5e306]: Тимофей Королёв
+              - cell "t.kingsbury@dundermifflinpaper.com" [ref=f5e307]
+              - cell "Встречи FREE" [ref=f5e308]
+        - generic [ref=f5e309]:
+          - generic [ref=f5e310]:
+            - generic [ref=f5e311]: На странице
+            - generic [ref=f5e313]:
+              - combobox "Сотрудников на странице" [ref=f5e314] [cursor=pointer]:
+                - option "12" [selected]
+                - option "25"
+                - option "50"
+                - option "100"
+              - group [aria-hidden]
+            - paragraph [ref=f5e315]: 1–12 из 66
+          - navigation "Страницы сотрудников" [ref=f5e316]:
+            - list [ref=f5e317]:
+              - listitem [ref=f5e318]:
+                - button "Предыдущая страница" [disabled]:
+                  - generic: Назад
+              - listitem [ref=f5e319]:
+                - button "Страница 1" [ref=f5e320] [cursor=pointer]: "1"
+              - listitem [ref=f5e321]:
+                - button "Страница 2" [ref=f5e322] [cursor=pointer]: "2"
+              - listitem [ref=f5e323]:
+                - button "Страница 3" [ref=f5e324] [cursor=pointer]: "3"
+              - listitem [ref=f5e325]:
+                - button "Страница 4" [ref=f5e326] [cursor=pointer]: "4"
+              - listitem [ref=f5e327]:
+                - button "Страница 5" [ref=f5e328] [cursor=pointer]: "5"
+              - listitem [ref=f5e329]:
+                - button "Страница 6" [ref=f5e330] [cursor=pointer]: "6"
+              - listitem [ref=f5e331]:
+                - button "Следующая страница" [ref=f5e332] [cursor=pointer]:
+                  - generic [ref=f5e333]: Далее
+      - button "Сбросить демоданные сотрудников" [ref=f5e338] [cursor=pointer]

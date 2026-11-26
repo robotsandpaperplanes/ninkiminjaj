@@ -36,6 +36,7 @@ export const quotaCatalog = {
   ],
 };
 export type BooleanPermission = Exclude<keyof Permissions, 'communication' | 'communicationGroups'>;
+export const viewAllEventsDescription = 'Сотрудники смогут просматривать все мероприятия, созданные другими участниками организации';
 export const userRights: { section: string; items: { key: BooleanPermission; label: string; description?: string }[] }[] = [
   { section: 'Доступ и данные организации', items: [
     { key: 'upload', label: 'Возможность загружать файлы с компьютера', description: 'На мероприятиях и в чатах' },

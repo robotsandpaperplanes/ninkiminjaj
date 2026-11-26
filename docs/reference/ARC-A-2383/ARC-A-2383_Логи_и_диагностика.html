@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>МТС Линк — Логи и диагностика · продуктовый макет</title><style>
+:root{--bg:#f8f9fc;--text:#1c2030;--muted:#687187;--border:#e5e8f0;--purple:#8426ef;--red:#e52e4d;--surface:#fff;--soft:#f6f7fa}*{box-sizing:border-box}body{font:14px/1.5 Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);margin:0}button,input{font:inherit}header{height:76px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 30px;gap:28px}.brand{font-weight:900;font-size:20px;letter-spacing:-.5px;line-height:19px}.mark{color:#ee264a;font-size:29px}.shell{display:grid;grid-template-columns:242px 1fr;min-height:calc(100vh - 76px)}aside{background:#fff;border-right:1px solid var(--border);padding:24px 20px;display:flex;flex-direction:column;gap:8px}aside div{padding:9px 4px;font-size:16px}aside .active{color:var(--purple);font-weight:700}aside .bottom{margin-top:auto;font-size:12px;color:var(--muted)}main{padding:32px;max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:start;gap:18px;margin-bottom:20px}h1{font-size:28px;font-weight:600;margin:0 0 6px}h2{font-size:19px;margin:0 0 4px}h3{font-size:16px;margin:0 0 12px}p{margin:5px 0;color:#5d677e}.small{font-size:12px;color:var(--muted)}.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:18px;box-shadow:0 2px 5px #1b233008}.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}.metric{background:#fafafd;border:1px solid var(--border);border-radius:9px;padding:16px}.metric strong{font-size:24px;display:block}.btn{background:var(--purple);color:white;border:0;border-radius:7px;padding:11px 17px;cursor:pointer;font-weight:600}.btn:focus-visible,.tab:focus-visible{outline:3px solid #9b83ee}.btn.secondary{background:white;color:var(--purple);border:1px solid #d8c8f5}.btn:disabled{opacity:.45;cursor:default}.pill{display:inline-block;border-radius:20px;padding:4px 10px;background:#eef1f6;font-size:12px;color:#59677b}.pill.good{background:#e9f7ee;color:#16734c}.pill.bad{background:#fdecef;color:#ae2640}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.subhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.tabs{display:flex;gap:7px;margin:15px 0}.tab{padding:9px 15px;background:#f5f6fa;border:1px solid #e4e6ee;border-radius:7px;cursor:pointer}.tab.active{background:#f1e8fd;border-color:#cdb0f6;color:#7324c9;font-weight:bold}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.info{border:1px solid var(--border);border-radius:8px;padding:14px}.label{color:var(--muted);font-size:12px}.value{font-size:16px;font-weight:bold}.bar{height:7px;background:#edf0f6;border-radius:6px;margin:8px 0 6px;overflow:hidden}.fill{height:100%;background:#8c53de}.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;text-align:left;min-width:560px}th,td{border-bottom:1px solid #ebedf2;padding:11px 10px}th{color:var(--muted);font-size:12px;font-weight:normal}tr:last-child td{border-bottom:0}.filters{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.search{border:1px solid var(--border);padding:9px 12px;border-radius:7px;min-width:230px}.muted-note{background:#f7f8fb;border-left:3px solid #d2d7e4;padding:11px 14px;color:#5d677e;font-size:13px}.radio{display:flex;gap:9px;align-items:center;margin:9px 0}.check{display:flex;gap:9px;align-items:center;margin-top:15px}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.demo{font-size:12px;color:#74539d;border:1px solid #e6d9f5;background:#fcf8ff;border-radius:6px;padding:5px 9px}.notice{margin-top:10px;background:#fff8ed;color:#83521e;border:1px solid #f2dfc2;padding:11px;border-radius:7px}.result{display:none;margin-top:13px;border-radius:7px;background:#f3f8f7;padding:11px;color:#205a47}.result.visible{display:block}.hr{height:1px;background:var(--border);margin:16px 0}@media(max-width:1080px){.metric-grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}@media(max-width:740px){.shell{display:block}aside{display:none}main{padding:17px}.grid2,.kv{grid-template-columns:1fr}header{height:65px;padding:0 17px}.top{display:block}.metric-grid{grid-template-columns:1fr 1fr}.panel{padding:16px}}
+
+#diagnosticScope{font:inherit;border:1px solid var(--border);padding:9px;border-radius:7px;background:#fff;margin-left:8px}#packetVmList label{display:flex;gap:10px;align-items:flex-start;margin:11px 0}#packetVmList small{color:var(--muted)}
+</style></head><body><header><span class="mark">▣</span><div class="brand">МТС<br/>ЛИНК</div><span style="font-size:22px">Администрирование</span><span class="demo" style="margin-left:auto">Продуктовый макет · без подключения к серверу</span></header><div class="shell"><aside><div>Аккаунты</div><div>Брендирование</div><div>Безопасность</div><div>Серверы</div><div>SMTP</div><div class="active">Логи и диагностика</div><div>Лицензия</div><div class="bottom">training<br/>v3.9.205-5</div></aside><main>
+<div class="top"><div><h1>Логи и диагностика</h1><p>Просмотр фактического состояния виртуальных машин и установленных компонентов. Для расследования инцидента сформируйте диагностический пакет.</p></div><button class="btn secondary" id="refresh">↻ Обновить данные</button></div>
+<section class="panel"><div class="row"><div><h2>Состояние инсталляции</h2><div class="small">Разовая проверка · <span id="checkedAt">02.11.2026, 14:42</span></div></div><span class="pill">Без оценки WARN/CRIT</span></div><div class="metric-grid"><div class="metric"><strong>3 из 3</strong><div class="small">ВМ проверены</div></div><div class="metric"><strong>8 из 9</strong><div class="small">Обнаруженных контейнеров запущено</div></div><div class="metric"><strong>1</strong><div class="small">Остановленных контейнеров</div></div><div class="metric"><strong>15 из 20</strong><div class="small">Выполненных проверок успешно</div></div></div><div class="small">Результаты отражают только момент проверки и не гарантируют отсутствие других неисправностей. Значения ниже — демонстрационные; показываются только проверки компонентов конкретной ВМ.</div></section>
+<section class="panel" id="scopePanel"><h2>Область диагностики</h2><p>Выберите продукт или всю инсталляцию. В список войдут связанные ВМ, включая общие инфраструктурные зависимости. Состав ниже демонстрационный.</p><div class="filters"><label>Область: <select id="diagnosticScope"><option value="all" selected>Вся инсталляция</option><option value="meetings">Встречи</option><option value="chats">Чаты / Платформа</option></select></label><span class="small" id="scopeSummary"></span></div><div class="muted-note" id="scopeNotice" style="margin-top:12px"></div></section><section class="panel"><div class="row"><div><h2>Виртуальные машины</h2><div class="small">Данные по каждой ВМ отдельно · Чаты/Платформа, Встречи, БД Встреч</div></div><span class="pill good">Сбор доступен</span></div><div class="tabs" id="vmTabs"></div><div class="row"><span class="small" id="vmRole">Встречи · Media/API · Debian 12 · uptime 12 дней</span><span class="pill good">Доступна</span></div><div class="tabs" id="contentTabs"><button class="tab active" data-section="resources">Ресурсы ВМ</button><button class="tab" data-section="containers">Контейнеры</button><button class="tab" data-section="checks">Проверки</button></div><div id="view"></div></section>
+<section class="panel"><h2>Сформировать диагностический пакет</h2><p>Расширенные технические проверки для анализа специалистами поддержки. Диагностический файл формируется локально и не отправляется автоматически.</p><div class="hr"></div><h3>ВМ для диагностического пакета</h3><p class="small">По умолчанию выбраны все связанные ВМ. При необходимости исключите отдельные узлы; исключение не изменяет область просмотра проверок.</p><div id="packetVmList"></div><div class="notice" hidden="" id="packetWarning">Часть связанных ВМ исключена. Диагностический пакет может не содержать данных о причине неисправности.</div><div class="hr"></div><label class="check"><input checked="" id="logs" type="checkbox"/> <b>Включить логи сервисов</b></label><div id="logOptions"><div class="small" style="margin:12px 0 5px">Период выгрузки</div><label class="radio"><input checked="" name="period" type="radio" value="30m"/> Последние 30 минут</label><label class="radio"><input name="period" type="radio" value="all"/> Все доступные логи</label><div class="notice" hidden="" id="fullWarn">Полная выгрузка может включать гигабайты данных. Для безопасности нужны лимиты размера, времени и свободного места; при их достижении пакет должен явно отмечать неполноту.</div></div><div class="hr"></div><button class="btn" id="generate">Сформировать пакет (демо)</button><div class="result" id="status"></div><div class="small" style="margin-top:12px">Планируемый итог — защищённый диагностический пакет для передачи в СТП. Клиент не видит внутренний HTML/Markdown-отчёт, который строится отдельной утилитой после расшифровки. Техническая интеграция пока не реализована.</div></section><div class="small">Сертификаты не включены в диагностику — для них предусмотрен отдельный раздел. Без непрерывного сбора метрик пиковые CPU/RAM за прошлый период не отображаются.</div>
+</main></div><script>
+const data = {
+  chats: {
+    role: 'Чаты / Платформа · RedOS 8 · uptime 8 дней (демо)',
+    cpu: 32, ram: 74, ramUsed: '23,7 из 32 ГБ', swap: '1,2 из 8 ГБ',
+    disks: [['/','80 ГБ','39 ГБ','51%'],['/var','300 ГБ','57 ГБ','81%']],
+    inodes: [['/','19%'],['/var','27%']],
+    docker: {root:'/var/lib/docker',mount:'/var',fill:'81%',size:'61 ГБ (объекты Docker, демо)'},
+    containers: [
+      ['notification-api-go','Exited',209,'false'],
+      ['postgres-chats','Running',0,'false'],
+      ['kafka','Running',0,'false'],
+      ['elasticsearch','Running',0,'false']
+    ],
+    checks: [
+      ['Docker daemon','Docker API: version / ps','Пройдена'],
+      ['PostgreSQL Чатов','pg_isready / простой запрос','Пройдена'],
+      ['Kafka','TCP и ответ брокера','Пройдена'],
+      ['Elasticsearch','HTTP _cluster/health: доступность','Пройдена'],
+      ['Kafka Connect','REST /connectors: доступность','Не пройдена'],
+      ['KeyDB / Redis','PING','Пройдена'],
+      ['Ожидаемый контейнер notification-api-go','Наличие в Compose и состояние контейнера','Не пройдена'],
+      ['DNS','Разрешение обязательного имени с ВМ','Не пройдена']
+    ]
+  },
+  media: {
+    role: 'Встречи · Media/API · Debian 12 · uptime 12 дней (демо)',
+    cpu: 24, ram: 61, ramUsed: '24,4 из 40 ГБ', swap: '0 из 8 ГБ',
+    disks: [['/','70 ГБ','34 ГБ','51%'],['/opt','727 ГБ','385 ГБ','47%']],
+    inodes: [['/','12%'],['/opt','18%']],
+    docker: {root:'/var/lib/docker',mount:'/',fill:'51%',size:'8,4 ГБ (объекты Docker, демо)'},
+    containers: [
+      ['webinar-odin','Running',0,'false'],
+      ['webinar-nginx','Running',0,'false'],
+      ['rabbitmq','Running',0,'false'],
+      ['webinar-api','Running',0,'false']
+    ],
+    checks: [
+      ['Docker daemon','Docker API: version / ps','Пройдена'],
+      ['MySQL Встреч (выделенная ВМ)','Подключение к обязательной БД','Пройдена'],
+      ['RabbitMQ','Проверка доступности брокера','Пройдена'],
+      ['Supervisor','supervisorctl status','Не пройдена'],
+      ['HAProxy','Статус службы / проверка конфигурации','Пройдена'],
+      ['Odin','Конфигурация и прослушивание медиа-портов','Пройдена'],
+      ['Cron','Состояние демона и заданий','Пройдена'],
+      ['DNS','Разрешение обязательного имени с ВМ','Пройдена']
+    ]
+  },
+  db: {
+    role: 'Выделенная БД Встреч · MySQL · Debian 12 · uptime 9 дней (демо)',
+    cpu: 14, ram: 47, ramUsed: '15 из 32 ГБ', swap: '0 из 4 ГБ',
+    disks: [['/','120 ГБ','70 ГБ','42%'],['/data','500 ГБ','270 ГБ','46%']],
+    inodes: [['/','14%'],['/data','23%']],
+    diskModes: ['rw','ro'],
+    docker: {root:'/var/lib/docker',mount:'/',fill:'42%',size:'13 ГБ (демо)'},
+    containers: [['mysql-meetings','Running',0,'false']],
+    checks: [
+      ['Docker daemon','Docker API: version / ps','Пройдена'],
+      ['MySQL Встреч','Подключение и простой SQL-запрос','Пройдена'],
+      ['Файловая система /data','Режим монтирования (read-only)','Не пройдена'],
+      ['DNS','Разрешение обязательного имени с ВМ','Пройдена']
+    ]
+  }
+};
+
+let vm = 'media';
+let section = 'resources';
+
+// Демонстрационная модель связей. В реальном решении используется подтверждённый состав поставки,
+// общий для диагностики и управления; логика определяется не именами ВМ.
+const installations = {
+  all: ['chats','media','db'],
+  meetings: ['media','db'],
+  chats: ['chats']
+};
+const vmNames = {media:'VM-Meetings-01', chats:'VM-Chats-Platform-01', db:'VM-Meetings-DB-01'};
+let diagnosticScope = 'all';
+let packetSelected = new Set(installations[diagnosticScope]);
+function scopeVMs(){return installations[diagnosticScope] || installations.all;}
+function renderScope(){
+  const list=scopeVMs();
+  document.getElementById('scopeSummary').textContent = `ВМ в области: ${list.length}`;
+  document.getElementById('scopeNotice').textContent = diagnosticScope === 'all'
+    ? 'Показаны ВМ всей демонстрационной инсталляции.'
+    : 'Показаны связанные ВМ выбранного продукта, включая выделенную зависимость, если она входит в состав инсталляции. Внешние неуправляемые зависимости могут проверяться без сбора логов.';
+  document.getElementById('vmTabs').innerHTML=list.map(id => `<button class="tab ${id===vm?'active':''}" data-vm="${id}">${vmNames[id]}</button>`).join('');
+  document.querySelectorAll('[data-vm]').forEach(button=>button.addEventListener('click',()=>{vm=button.dataset.vm;render();}));
+  renderPacketVMs();
+}
+function renderPacketVMs(){
+  const list=scopeVMs();
+  document.getElementById('packetVmList').innerHTML=list.map(id => `<label><input type="checkbox" data-packetvm="${id}" ${packetSelected.has(id)?'checked':''}><span><b>${vmNames[id]}</b><br><small>${safe(data[id].role)}</small></span></label>`).join('');
+  document.querySelectorAll('[data-packetvm]').forEach(el => el.addEventListener('change',()=>{
+    if(el.checked)packetSelected.add(el.dataset.packetvm);else packetSelected.delete(el.dataset.packetvm);
+    document.getElementById('packetWarning').hidden=packetSelected.size===scopeVMs().length;
+    document.getElementById('generate').disabled=packetSelected.size===0;
+  }));
+  document.getElementById('packetWarning').hidden=packetSelected.size===list.length;
+  document.getElementById('generate').disabled=packetSelected.size===0;
+}
+
+
+const safe = value => String(value).replace(/[&<>"']/g, ch => ({
+  '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+}[ch]));
+
+const pill = value => {
+  let cls = '';
+  if (['Running','Пройдена','Доступен'].includes(value)) cls = 'good';
+  if (['Exited','Не пройдена'].includes(value)) cls = 'bad';
+  return `<span class="pill ${cls}">${safe(value)}</span>`;
+};
+
+function renderResources(d) {
+  const metric = (name, number, detail = '') => `
+    <div class="info">
+      <div class="label">${name}</div>
+      <div class="value">${number}%</div>
+      <div class="bar"><div class="fill" style="width:${number}%"></div></div>
+      <div class="small">${detail}</div>
+    </div>`;
+  return `
+    <div class="grid2">
+      ${metric('CPU · на момент проверки', d.cpu)}
+      ${metric('RAM · на момент проверки', d.ram, d.ramUsed)}
+      <div class="info"><div class="label">Swap</div><div class="value">${d.swap}</div></div>
+      <div class="info"><div class="label">Docker daemon</div><div class="value">Работает</div></div>
+    </div>
+    <h3 style="margin-top:19px">Диски и inodes</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Раздел</th><th>Общий объём</th><th>Свободно</th><th>Занято</th><th>Inodes занято</th></tr></thead>
+      <tbody>${d.disks.map((x,i) => `
+        <tr><td>${x[0]}${d.diskModes?.[i] === 'ro' ? ' <span class="pill bad">Только чтение</span>' : ''}</td><td>${x[1]}</td><td>${x[2]}</td><td>${x[3]}</td><td>${d.inodes[i][1]}</td></tr>
+      `).join('')}</tbody>
+    </table></div>
+    <h3 style="margin-top:20px">Данные Docker</h3>
+    <div class="grid2">
+      <div class="info"><div class="label">Docker data-root</div><div class="value">${d.docker.root}</div><div class="small">Раздел ${d.docker.mount} · ${d.docker.fill} занято</div></div>
+      <div class="info"><div class="label">Объём объектов Docker</div><div class="value">${d.docker.size}</div><div class="small">Не равен заполнению раздела файловой системы</div></div>
+    </div>`;
+}
+
+function renderContainers(d) {
+  return `
+    <div class="filters">
+      <div class="small">Список обнаруженных контейнеров · отображена демонстрационная часть</div>
+      <input class="search" id="filter" placeholder="Поиск по имени контейнера" aria-label="Поиск контейнера">
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Контейнер</th><th>Состояние</th><th>Рестартов (всего)</th><th>OOMKilled*</th></tr></thead>
+      <tbody id="containerRows"></tbody>
+    </table></div>
+    <div class="muted-note">* OOMKilled — признак завершения контейнера по данным Docker. Счётчик рестартов накопительный, а не за последние 30 минут.</div>`;
+}
+
+function renderChecks(d) {
+  return `
+    <div class="table-wrap"><table>
+      <thead><tr><th>Объект</th><th>Тип фактической проверки</th><th>Результат</th></tr></thead>
+      <tbody>${d.checks.map(x => `<tr><td>${safe(x[0])}</td><td>${safe(x[1])}</td><td>${pill(x[2])}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <div class="muted-note">Проверки отображают только их формальный результат. «Пройдена» не означает, что весь продукт исправен. Список определяется фактически установленными компонентами.</div>
+    <div class="muted-note">Показаны только проверки применимых компонентов. Проверка Kafka ограничена доступностью; репликация и Consumer lag здесь не выводятся. Наличие контейнера в Compose и доступность приложения — разные проверки. «Не выполнена» не означает успех.</div>`;
+}
+
+function render() {
+  const d = data[vm];
+  document.getElementById('vmRole').textContent = d.role;
+
+  document.querySelectorAll('[data-vm]').forEach(button => {
+    button.classList.toggle('active', button.dataset.vm === vm);
+  });
+  document.querySelectorAll('[data-section]').forEach(button => {
+    button.classList.toggle('active', button.dataset.section === section);
+  });
+
+  let content = '';
+  if (section === 'resources') content = renderResources(d);
+  else if (section === 'containers') content = renderContainers(d);
+  else content = renderChecks(d);
+
+  document.getElementById('view').innerHTML = content;
+
+  if (section === 'containers') {
+    const redraw = () => {
+      const query = document.getElementById('filter').value.toLowerCase();
+      const rows = d.containers.filter(c => c[0].toLowerCase().includes(query));
+      document.getElementById('containerRows').innerHTML = rows.map(c => `
+        <tr><td>${safe(c[0])}</td><td>${pill(c[1])}</td><td>${c[2]}</td><td>${safe(c[3])}</td></tr>
+      `).join('') || '<tr><td colspan="4">Не найдено</td></tr>';
+    };
+    document.getElementById('filter').addEventListener('input', redraw);
+    redraw();
+  }
+}
+
+
+
+document.querySelectorAll('[data-section]').forEach(button => {
+  button.addEventListener('click', () => {
+    section = button.dataset.section;
+    render();
+  });
+});
+
+document.getElementById('refresh').addEventListener('click', () => {
+  document.getElementById('checkedAt').textContent = 'Демо: данные не обновляются';
+});
+
+const checkLogs = document.getElementById('logs');
+const logOptions = document.getElementById('logOptions');
+checkLogs.addEventListener('change', () => {
+  logOptions.hidden = !checkLogs.checked;
+});
+
+document.querySelectorAll('[name=period]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.getElementById('fullWarn').hidden =
+      document.querySelector('[name=period]:checked').value !== 'all';
+  });
+});
+
+document.getElementById('generate').addEventListener('click', () => {
+  const el = document.getElementById('status');
+  const nodes=Array.from(packetSelected).map(id=>vmNames[id]).join(', ');
+  const msg = checkLogs.checked
+    ? ` с логами: ${document.querySelector('[name=period]:checked').value === 'all' ? 'все доступные' : 'последние 30 минут'}`
+    : ' без логов';
+  el.textContent = 'Демонстрация: выбранные ВМ — ' + nodes + '. Пакет не создан.' + msg;
+  el.classList.add('visible');
+});
+
+document.getElementById('diagnosticScope').addEventListener('change', e=>{
+  diagnosticScope=e.target.value;
+  packetSelected=new Set(scopeVMs());
+  vm=scopeVMs()[0];
+  renderScope();
+  render();
+});
+renderScope();
+render();
+</script></body></html>

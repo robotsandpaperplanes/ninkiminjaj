@@ -1,0 +1,98 @@
+<style>
+#cert-modal-example{--cm-surface:light-dark(#fff,#202124);--cm-text:light-dark(#202124,#f1f3f4);--cm-muted:light-dark(#62666d,#b5b9c0);--cm-line:light-dark(#e1e4e8,#41454d);--cm-blue:light-dark(#1565c0,#90caf9);--cm-soft:light-dark(#f5f7fa,#292d33);font-family:Roboto,Arial,sans-serif;color:var(--cm-text);padding:52px 16px 24px;box-sizing:border-box}
+#cert-modal-example *{box-sizing:border-box}
+#cert-modal-example .cm-dialog{background:var(--cm-surface);border-radius:12px;box-shadow:0 12px 42px light-dark(#182b4526,#0006);max-width:680px;margin:auto;overflow:hidden}
+#cert-modal-example .cm-header{padding:24px 28px 22px;position:relative}
+#cert-modal-example .cm-breadcrumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding-right:36px;font-size:13px;line-height:1.6;color:var(--cm-muted);margin:0 0 12px;list-style:none}
+#cert-modal-example button{font:inherit;cursor:inherit}
+#cert-modal-example .cm-crumb{background:none;border:0;padding:0;color:var(--cm-blue);text-decoration:underline;text-underline-offset:3px;font-size:13px}
+#cert-modal-example h2{font-size:24px;line-height:1.3;font-weight:500;margin:0 36px 8px 0;color:var(--cm-text)}
+#cert-modal-example p{font-size:14px;line-height:1.6;margin:0;color:var(--cm-muted)}
+#cert-modal-example .cm-close{position:absolute;right:16px;top:18px;width:40px;height:40px;display:grid;place-items:center;background:none;border:0;border-radius:50%;color:var(--cm-muted)}
+#cert-modal-example .cm-close:hover{background:var(--cm-soft)}
+#cert-modal-example .cm-steps{list-style:none;display:flex;gap:8px;margin:0;padding:20px 28px;border-top:1px solid var(--cm-line);border-bottom:1px solid var(--cm-line)}
+#cert-modal-example .cm-steps li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--cm-muted);flex:1}
+#cert-modal-example .cm-step-num{width:24px;height:24px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:var(--cm-soft);color:var(--cm-muted)}
+#cert-modal-example .cm-steps [aria-current=step]{color:var(--cm-text);font-weight:500}
+#cert-modal-example .cm-steps [aria-current=step] .cm-step-num{background:var(--cm-blue);color:light-dark(#fff,#102842)}
+#cert-modal-example .cm-content{padding:24px 28px;display:grid;gap:16px;min-height:210px}
+#cert-modal-example .cm-file{display:flex;gap:14px;align-items:center;border:1px solid var(--cm-line);border-radius:8px;padding:16px;min-width:0}
+#cert-modal-example .cm-file>div{min-width:0;flex:1}
+#cert-modal-example .cm-file strong{font-size:14px;font-weight:500;display:block;margin-bottom:4px}
+#cert-modal-example .cm-file small{font-size:13px;color:var(--cm-muted);overflow-wrap:anywhere}
+#cert-modal-example .cm-file>svg{color:var(--cm-muted);width:22px;height:22px;flex-shrink:0}
+#cert-modal-example .cm-action{border:0;background:transparent;color:var(--cm-blue);font-size:14px;font-weight:500;padding:10px 12px;border-radius:4px;min-height:40px;white-space:nowrap}
+#cert-modal-example .cm-action:hover{background:var(--cm-soft)}
+#cert-modal-example .cm-primary{background:var(--cm-blue);color:light-dark(#fff,#102842);padding:10px 18px}
+#cert-modal-example .cm-primary:hover{background:var(--cm-blue);filter:brightness(.95)}
+#cert-modal-example .cm-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 28px;border-top:1px solid var(--cm-line)}
+#cert-modal-example .cm-scope{display:flex;gap:12px;align-items:center;padding:12px 0;font-size:14px}
+#cert-modal-example input[type=checkbox]{width:18px;height:18px;accent-color:var(--cm-blue)}
+#cert-modal-example .cm-parent{background:var(--cm-surface);padding:28px;border-radius:12px;max-width:680px;margin:auto}
+#cert-modal-example .cm-parent h2{margin-bottom:20px}
+#cert-modal-example [hidden]{display:none!important}
+@media(max-width:480px){#cert-modal-example{padding:50px 8px 16px}#cert-modal-example .cm-header,#cert-modal-example .cm-content{padding:20px}#cert-modal-example .cm-steps{padding:16px 20px;gap:12px;flex-wrap:wrap}#cert-modal-example .cm-steps li{flex:auto;font-size:12px}#cert-modal-example .cm-file{flex-wrap:wrap}#cert-modal-example .cm-footer{padding:16px 20px}#cert-modal-example h2{font-size:22px}}
+</style>
+<div id="cert-modal-example" class="viz-dotted-background">
+  <section class="cm-dialog" role="dialog" aria-labelledby="cm-title" aria-describedby="cm-description">
+    <header class="cm-header">
+      <nav aria-label="Навигация по сертификатам">
+        <ol class="cm-breadcrumbs">
+          <li><button type="button" class="cm-crumb cursor-interaction" data-close>Сертификаты</button></li>
+          <li aria-hidden="true">/</li>
+          <li>Встречи, Чаты и Платформа</li>
+        </ol>
+      </nav>
+      <button type="button" class="cm-close cursor-interaction" aria-label="Закрыть окно" data-close><i data-lucide="x" aria-hidden="true"></i></button>
+      <h2 id="cm-title">Замена сертификата</h2>
+      <p id="cm-description">Загрузите новый сертификат и соответствующий закрытый ключ.</p>
+    </header>
+    <ol class="cm-steps" aria-label="Этапы замены сертификата">
+      <li aria-current="step"><span class="cm-step-num">1</span>Загрузка</li>
+      <li><span class="cm-step-num">2</span>Область применения</li>
+      <li><span class="cm-step-num">3</span>Подтверждение</li>
+    </ol>
+    <div class="cm-content" data-upload>
+      <div class="cm-file"><i data-lucide="file-key" aria-hidden="true"></i><div><strong>Сертификат</strong><small data-file="crt">certificate.crt</small></div><button type="button" class="cm-action cursor-interaction" data-pick="crt">Выбрать файл</button><input type="file" accept=".crt" data-input="crt" aria-label="Файл сертификата" hidden></div>
+      <div class="cm-file"><i data-lucide="key-round" aria-hidden="true"></i><div><strong>Закрытый ключ</strong><small data-file="key">private.key</small></div><button type="button" class="cm-action cursor-interaction" data-pick="key">Выбрать файл</button><input type="file" accept=".key" data-input="key" aria-label="Файл закрытого ключа" hidden></div>
+      <div><button type="button" class="cm-action cursor-interaction" data-pick="chain">+ Добавить промежуточные сертификаты</button><input type="file" accept=".crt,.pem" data-input="chain" aria-label="Промежуточные сертификаты" hidden><p data-file="chain">Если они не включены в файл основного сертификата.</p></div>
+    </div>
+    <div class="cm-content" data-scope hidden>
+      <label class="cm-scope"><input type="checkbox" checked data-product="meet">Встречи — meet.company.ru</label>
+      <label class="cm-scope"><input type="checkbox" checked data-product="chat">Чаты и Платформа — chat.company.ru</label>
+    </div>
+    <div class="cm-content" data-summary hidden aria-live="polite"></div>
+    <footer class="cm-footer"><button type="button" class="cm-action cursor-interaction" data-back>Отмена</button><button type="button" class="cm-action cm-primary cursor-interaction" data-next>Далее</button></footer>
+  </section>
+  <section class="cm-parent" hidden><h2>Сертификаты</h2><div class="cm-file"><div><strong>Встречи, Чаты и Платформа</strong><small>meet.company.ru · chat.company.ru</small></div><button type="button" class="cm-action cursor-interaction" data-open>Заменить</button></div></section>
+</div>
+<script>
+(()=>{
+ const root=document.getElementById('cert-modal-example');
+ const q=s=>root.querySelector(s);
+ let step=0,opened=true;
+ const descriptions=['Загрузите новый сертификат и соответствующий закрытый ключ.','Выберите продукты, для которых нужно заменить сертификат.','Проверьте область применения перед заменой сертификата.'];
+ function render(){
+   q('.cm-dialog').hidden=!opened;q('.cm-parent').hidden=opened;
+   q('[data-upload]').hidden=step!==0;q('[data-scope]').hidden=step!==1;q('[data-summary]').hidden=step!==2;
+   root.querySelectorAll('.cm-steps li').forEach((el,i)=>{if(i===step)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});
+   q('#cm-description').textContent=descriptions[step];q('[data-back]').textContent=step?'Назад':'Отмена';
+   q('[data-next]').textContent=step===2?'Закрыть пример':'Далее';
+   q('[data-next]').disabled=step===1&&!root.querySelector('[data-product]:checked');
+   if(step===2){const names=Array.from(root.querySelectorAll('[data-product]:checked')).map(el=>el.parentElement.textContent.trim());q('[data-summary]').textContent='Новый сертификат будет применён к: '+names.join('; ')+'.';}
+ }
+ function save(){window.openai?.setWidgetState({modelContent:{example:'Modal header with breadcrumbs',step,opened},privateContent:{step,opened}})?.catch(()=>{});}
+ function close(){opened=false;render();save();q('[data-open]').focus();}
+ root.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',close));
+ q('[data-open]').addEventListener('click',()=>{opened=true;step=0;render();save();q('[data-close]').focus();});
+ q('[data-back]').addEventListener('click',()=>{if(step){step--;render();save();}else close();});
+ q('[data-next]').addEventListener('click',()=>{if(step===2){close();return;}step++;render();save();});
+ root.querySelectorAll('[data-pick]').forEach(b=>b.addEventListener('click',()=>q('[data-input="'+b.dataset.pick+'"]').click()));
+ root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('change',()=>{if(el.files[0])q('[data-file="'+el.dataset.input+'"]').textContent=el.files[0].name;}));
+ root.querySelectorAll('[data-product]').forEach(el=>el.addEventListener('change',render));
+ root.addEventListener('keydown',e=>{if(e.key==='Escape'&&opened)close();});
+ function restore(s){const v=s?.privateContent;if(v){step=Number.isInteger(v.step)&&v.step>=0&&v.step<=2?v.step:0;opened=v.opened!==false;}render();}
+ restore(window.openai?.widgetState);
+ window.addEventListener('openai:set_globals',e=>{if(e.detail?.globals?.widgetState)restore(e.detail.globals.widgetState);});
+})();
+</script>

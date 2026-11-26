@@ -27,11 +27,11 @@ Everyone is the intended employee baseline. Guest access is separate. The protot
 
 ## Employee records and reset
 
-Employee role (owner/admin/employee/guest) and lifecycle status (active/invited/requested) are independent fields. Default seed: 74 records, of which 66 are active, four invited and four requested. Active includes owner Ed O'Brien's Russian display name, two administrators, 58 employees and five new guests. Allocation is demo data, not a production role policy.
+Employee role (owner/admin/employee/guest) and lifecycle status (active/invited/requested) are independent fields. Default seed: 200 records, of which 192 are active, four invited and four requested. Active includes the original owner and two administrators, 184 employees and five guests. Allocation is demo data, not a production role policy. Blocked status is not represented.
 
 Russian display names remain exactly as supplied. Email aliases use original first initial and surname, lowercased ASCII, at `dundermifflinpaper.com`. Punctuation/diacritics are removed. Win/Will Butler collide: Will uses `w.butler2`; Janitor has no supplied given name and uses `janitor`. These are explicit fixture exceptions. New guest aliases use transliterated fictional names.
 
-Seed objects are read-only; edits use deep copies. Storage schema 2 retains key `mts-link-employee-database-v1`. Loading schema 1 updates existing known emails, converts the former three guests to employees and adds five new guests once. Existing deletions, request approvals and saved settings survive. Once schema 2 is stored, deleted new guests are not re-added by loading. Reset intentionally restores the entire current employee seed and settings.
+Seed objects are read-only; edits use deep copies. Storage schema 3 retains key `mts-link-employee-database-v1`. Loading schema 1 first performs the earlier alias/guest upgrade; loading schema 1 or 2 then appends only the 126 new IDs. Existing deletions, request approvals and saved settings survive. Once schema 3 is stored, deleted users are not re-added by loading. Reset intentionally restores the entire 200-record seed and default settings.
 
 Future shared-data requirement: stable references across employees, groups, roles, teams and chats. Deletion should remove related memberships; restoring employees alone should not silently restore separately changed relationships. Per-entity/full reset behavior needs implementation and a relationship migration. Current reset is scoped to Employees, not a full organization reset.
 

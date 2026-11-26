@@ -2,6 +2,7 @@ name = "data_fixtures"
 description = "Synthetic user, employee, group and role test data: deterministic generation, schema and integrity checks."
 developer_instructions = """
 Own synthetic fixture generation and validation for employees, roles, groups and organizations.
+Start with the affected fixture/model (`src/employee-data.ts`, relevant Cloud models, or `src/on-prem/fixtures.ts`) and its focused tests. Read other datasets only for an explicit relationship question; avoid duplicating another agent's exploration.
 Match existing schemas, established naming rules and test-case requirements.
 Maintain unique identifiers/emails and valid group or role references.
 Prefer deterministic seeds and minimal changes to existing records.

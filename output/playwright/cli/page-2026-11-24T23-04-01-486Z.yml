@@ -1,0 +1,92 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - img "МТС Линк" [ref=f1e7]
+      - separator [ref=f1e8]
+      - generic [ref=f1e9]:
+        - paragraph [ref=f1e10]: Бизнес
+        - 'button "Режим администрирования: Сервер" [ref=f1e11] [cursor=pointer]': Сервер
+      - button "Включить светлую тему" [ref=f1e15] [cursor=pointer]
+      - button "Уведомления" [ref=f1e18] [cursor=pointer]
+      - generic "Сценарии прототипа" [ref=f1e22]:
+        - button "Сценарии прототипа" [ref=f1e23] [cursor=pointer]
+      - button "Профиль и оформление" [ref=f1e26] [cursor=pointer]
+  - navigation "Разделы админ-панели" [ref=f1e31]:
+    - generic [ref=f1e32]:
+      - generic [ref=f1e33]: Серверное администрирование
+      - list [ref=f1e34]:
+        - button "Сертификаты" [ref=f1e35] [cursor=pointer]
+        - button "Лицензия" [ref=f1e38] [cursor=pointer]
+        - button "Сетевые настройки" [ref=f1e41] [cursor=pointer]
+  - main [ref=f1e44]:
+    - generic [ref=f1e46]:
+      - generic [ref=f1e48]:
+        - heading "Сетевые настройки" [level=1] [ref=f1e49]
+        - paragraph [ref=f1e50]: Адреса узлов, домены продуктов и история изменений
+      - tablist "Сетевые настройки" [ref=f1e54]:
+        - tab "Внутренние IP" [selected] [ref=f1e55] [cursor=pointer]
+        - tab "FQDN" [ref=f1e56] [cursor=pointer]
+        - tab "История изменений" [ref=f1e57] [cursor=pointer]
+      - generic [ref=f1e59]:
+        - heading "Адреса ВМ" [level=6] [ref=f1e60]
+        - button "Изменить IP" [ref=f1e61] [cursor=pointer]
+      - table "Внутренние IP узлов" [ref=f1e63]:
+        - rowgroup [ref=f1e64]:
+          - row [ref=f1e65]:
+            - columnheader "ВМ / компонент" [ref=f1e66]
+            - columnheader "Продукт" [ref=f1e67]
+            - columnheader "Внутренний IP" [ref=f1e68]
+            - columnheader "Действия" [ref=f1e69]
+        - rowgroup [ref=f1e70]:
+          - row [ref=f1e71]:
+            - cell [ref=f1e72]:
+              - text: web-01
+              - paragraph [ref=f1e73]: Web
+            - cell "Встречи" [ref=f1e74]
+            - cell "10.20.0.11" [ref=f1e75]
+            - cell [ref=f1e76]:
+              - button "Изменить IP web-01" [ref=f1e77] [cursor=pointer]: Изменить
+          - row [ref=f1e78]:
+            - cell [ref=f1e79]:
+              - text: media-01
+              - paragraph [ref=f1e80]: Media
+            - cell "Встречи" [ref=f1e81]
+            - cell "10.20.0.12" [ref=f1e82]
+            - cell [ref=f1e83]:
+              - button "Изменить IP media-01" [ref=f1e84] [cursor=pointer]: Изменить
+          - row [ref=f1e85]:
+            - cell [ref=f1e86]:
+              - text: gateway-01
+              - paragraph [ref=f1e87]: Gateway
+            - cell "Чаты" [ref=f1e88]
+            - cell "10.20.0.21" [ref=f1e89]
+            - cell [ref=f1e90]:
+              - button "Изменить IP gateway-01" [ref=f1e91] [cursor=pointer]: Изменить
+          - row [ref=f1e92]:
+            - cell [ref=f1e93]:
+              - text: gateway-02
+              - paragraph [ref=f1e94]: Gateway
+            - cell "Платформа" [ref=f1e95]
+            - cell "10.20.0.22" [ref=f1e96]
+            - cell [ref=f1e97]:
+              - button "Изменить IP gateway-02" [ref=f1e98] [cursor=pointer]: Изменить
+          - row [ref=f1e99]:
+            - cell [ref=f1e100]:
+              - text: boards-01
+              - paragraph [ref=f1e101]: Web
+            - cell "Доски" [ref=f1e102]
+            - cell "10.20.0.31" [ref=f1e103]
+            - cell [ref=f1e104]:
+              - button "Изменить IP boards-01" [ref=f1e105] [cursor=pointer]: Изменить
+          - row [ref=f1e106]:
+            - cell [ref=f1e107]:
+              - text: monitor-01
+              - paragraph [ref=f1e108]: Сбор метрик
+            - cell "Мониторинг" [ref=f1e109]
+            - cell "10.20.0.41" [ref=f1e110]
+            - cell [ref=f1e111]:
+              - button "Изменить IP monitor-01" [ref=f1e112] [cursor=pointer]: Изменить
+      - paragraph [ref=f1e113]: Сервис назначает новые адреса ВМ и обновляет связанные настройки. Область воздействия показывается до применения.
+      - generic [ref=f1e114]:
+        - paragraph [ref=f1e115]: Демонстрация · Все проверки и изменения имитируются
+        - button "Сбросить демоданные" [ref=f1e116] [cursor=pointer]

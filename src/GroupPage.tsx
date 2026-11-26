@@ -1,3 +1,4 @@
+import { Dialog, Menu, TextField } from './app/ModeVisibility';
 import { PermissionRow } from './PermissionControl';
 import { communicationState } from './role-states';
 import { roleChanges, roleProducts } from './role-catalog';
@@ -6,16 +7,16 @@ import { quotaCatalog } from './role-model';
 import UnsavedChangesBar from './UnsavedChangesBar';
 import { useEffect, useState, type MutableRefObject, type ReactNode } from 'react';
 import {
-  Alert, Avatar, Box, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent,
+  Alert, Avatar, Box, Button, Checkbox, Chip, DialogActions, DialogContent,
   DialogTitle, Divider, FormControlLabel, IconButton, InputAdornment, LinearProgress,
-  Link, Menu, MenuItem, Paper, Stack, Switch, Tab, Table, TableBody, TableCell,
-  TableContainer, TableHead, TablePagination, TableRow, Tabs, TextField, Tooltip, Typography,
+  Link, MenuItem, Paper, Stack, Switch, Tab, Table, TableBody, TableCell,
+  TableContainer, TableHead, TablePagination, TableRow, Tabs, Tooltip, Typography,
 } from '@mui/material';
 import { AddOutlined, ArrowBackOutlined, ContentCopyOutlined, FlagRounded, MoreVertOutlined, SearchOutlined, StarRounded } from '@mui/icons-material';
 import type { Group } from './data';
 import { defaultPermissions, defaultSettings, extraPeople, getDetails, newToken, people, productLabels, type GroupDetails, type Member, type Permissions, type Settings } from './group-model';
 
-import { roleConfig, everyoneSettings } from './role-model';
+import { roleConfig, everyoneSettings, viewAllEventsDescription } from './role-model';
 import { RoleType, RoleQuotas, RoleRights, RoleSettings, RolePreview } from './RoleControls';
 
 type TabKey = 'main' | 'members' | 'products' | 'permissions' | 'settings';
@@ -240,7 +241,7 @@ export default function GroupPage({ group, groups, onSave, onDelete, onBack, not
         </Section>
         <Section title="Встречи и мероприятия">
           <ToggleRow label="Возможность удаления сотрудником своих мероприятий" value={draft.permissions.deleteOwnEvents} onChange={v => permission('deleteOwnEvents', v)} />
-          <ToggleRow label="Просмотр всех мероприятий организации" description="Сотрудники смогут просматривать все мероприятия, созданные другими участниками организации" value={draft.permissions.viewAllEvents} onChange={v => permission('viewAllEvents', v)} />
+          <ToggleRow label="Просмотр всех мероприятий организации" description={viewAllEventsDescription} value={draft.permissions.viewAllEvents} onChange={v => permission('viewAllEvents', v)} />
           <ToggleRow label="Редактирование всех мероприятий организации" description="Сотрудникам будет доступна возможность проводить мероприятия других участников организации" value={draft.permissions.editAllEvents} onChange={v => permission('editAllEvents', v)} />
         </Section>
         <Section title="Курсы"><ToggleRow label="Возможность создавать курсы" value={draft.permissions.createCourses} onChange={v => permission('createCourses', v)} /></Section>

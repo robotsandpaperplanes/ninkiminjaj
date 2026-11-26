@@ -11,8 +11,9 @@ export const initialGroups: Group[] = [
   { id: 'plebs', name: 'Бичи', manager: '', count: 0, kind: 'system' },
 ];
 export const managers = initialGroups.map(g => g.manager).filter(Boolean);
+export const organizationName = 'Dunder Mifflin Paper Co';
 export const navigation = [
-  { label: 'Dunder Mifflin Paper Co', items: ['Организация', 'Сотрудники', 'Группы', 'Федерации'] },
+  { label: organizationName, items: ['Организация', 'Сотрудники', 'Группы', 'Федерации'] },
   { label: 'Управление', items: ['Журнал событий', 'Мониторинг', 'Безопасность', 'Интеграции'] },
   { label: 'Счета и платные функции', items: ['Тарифы', 'Брендирование', 'Платные мероприятия', 'Сертификат'] },
   { label: 'Администрирование', items: ['Аналитика', 'Устройства', 'API и вебхуки', 'SSO', 'SIEM', 'DLP'] },

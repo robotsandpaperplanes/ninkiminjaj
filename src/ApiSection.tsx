@@ -1,9 +1,11 @@
-import { useState, type Dispatch, type SetStateAction } from 'react';
+import { Dialog, Menu, TextField } from './app/ModeVisibility';
+import { OrganizationIdentity } from './app/OrganizationIdentity';
+import { useContext, useState, type Dispatch, type SetStateAction } from 'react';
 import {
-  Alert, Avatar, Box, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent,
-  DialogTitle, Divider, Drawer, FormControlLabel, IconButton, InputAdornment, Menu, MenuItem,
+  Alert, Avatar, Box, Button, Checkbox, Chip, DialogActions, DialogContent,
+  DialogTitle, Divider, Drawer, FormControlLabel, IconButton, InputAdornment, MenuItem,
   Paper, Radio, Stack, Switch, Tab, Table, TableBody, TableCell, TableContainer, TableHead,
-  TablePagination, TableRow, Tabs, TextField, Tooltip, Typography,
+  TablePagination, TableRow, Tabs, Tooltip, Typography,
 } from '@mui/material';
 import { AddOutlined, CloseOutlined, ContentCopyOutlined, DownloadOutlined, KeyOutlined, MoreHorizOutlined, SearchOutlined, ShieldOutlined } from '@mui/icons-material';
 import {
@@ -27,6 +29,7 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export default function ApiSection({ state, setState, notify, query, setQuery }: Props) {
+  const organizationName = useContext(OrganizationIdentity);
   const [tab, setTab] = useState(0);
   const [status, setStatus] = useState('all');
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -79,7 +82,7 @@ export default function ApiSection({ state, setState, notify, query, setQuery }:
         ...(JSON.stringify([currentKey.fullAccess, [...currentKey.scopes].sort()]) !== JSON.stringify([next.fullAccess, [...next.scopes].sort()]) ? [{ field: 'Разрешения', before: currentKey.fullAccess ? 'Все текущие разрешения' : currentKey.scopes.join(', '), after: next.fullAccess ? 'Все текущие разрешения' : next.scopes.join(', ') }] : []),
       ] : [{ field: 'Вид ключа', before: '—', after: next.kind === 'secure' ? 'Новый' : 'Текущий (устаревший)' }, { field: 'Разрешения', before: '—', after: next.fullAccess ? 'Все текущие разрешения' : next.scopes.join(', ') }, { field: 'Срок действия', before: '—', after: next.expiresAt ? displayDate(next.expiresAt, true) : 'Без ограничения' }];
       if (currentKey && !changes.length) { setDraft(null); return; }
-      setState(previous => ({ ...previous, keys: currentKey ? previous.keys.map(k => k.id === next.id ? next : k) : [next, ...previous.keys], events: [keyAudit(next, currentKey ? 'Изменение настроек ключа' : 'Создание ключа', changes), ...previous.events] }));
+      setState(previous => ({ ...previous, keys: currentKey ? previous.keys.map(k => k.id === next.id ? next : k) : [next, ...previous.keys], events: [keyAudit(next, currentKey ? 'Изменение настроек ключа' : 'Создание ключа', changes, organizationName), ...previous.events] }));
       setDraft(null);
       if (generated) { setSecretSaved(false); setSecret({ name: next.name, value: generated.value, secure: next.kind === 'secure' }); }
       else notify('Настройки ключа сохранены');
@@ -93,7 +96,7 @@ export default function ApiSection({ state, setState, notify, query, setQuery }:
     setBusy(true); setError('');
     try {
       const generated = action === 'rotate' ? await generateDemoSecret() : null;
-      const next = transitionApiKey(state, key.id, action, generated, Number(rotateDays));
+      const next = transitionApiKey(state, key.id, action, generated, Number(rotateDays), organizationName);
       setState(next);
       setConfirm(null);
       if (generated) { setSecretSaved(false); setSecret({ name: key.name, value: generated.value, secure: key.kind === 'secure' }); }
@@ -105,7 +108,7 @@ export default function ApiSection({ state, setState, notify, query, setQuery }:
     const admin = state.admins.find(a => a.id === id);
     if (!admin || admin.owner) return;
     const allowed = !admin.allowed;
-    setState(previous => changeAdminAccess(previous, id, allowed));
+    setState(previous => changeAdminAccess(previous, id, allowed, organizationName));
     setAccessConfirm(null); notify(allowed ? 'Полномочие выдано' : 'Полномочие отозвано. Ключи администратора продолжают работать.');
   }
   function exportJournal() {
@@ -193,7 +196,7 @@ export default function ApiSection({ state, setState, notify, query, setQuery }:
       {event && <><Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2}><Box><Typography variant="h6" id="audit-details-title">{event.operation}</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{displayDate(event.at, true)} МСК</Typography></Box><IconButton onClick={() => setEvent(null)} aria-label="Закрыть подробности"><CloseOutlined /></IconButton></Stack><Divider sx={{ my: 3 }} /><Stack spacing={2.5}>
         <Box><Chip variant="outlined" color={event.result === 'success' ? 'success' : 'error'} label={event.result === 'success' ? 'Успешно' : 'Отказ'} /></Box>
         {event.reason && <Alert severity="error">{event.reason} Данные не изменены.</Alert>}
-        <Field label="Организация" value={ORGANIZATION} /><Field label="Источник" value={event.source === 'api' ? 'UserAPI' : 'Кабинет организации'} /><Field label="Автор действия" value={event.actor} /><Field label="Интеграция" value={event.integrationName ? `${event.integrationName} · ${event.integrationId}` : 'Не определена / не применимо'} />
+        <Field label="Организация" value={event.organization || ORGANIZATION} /><Field label="Источник" value={event.source === 'api' ? 'UserAPI' : 'Кабинет организации'} /><Field label="Автор действия" value={event.actor} /><Field label="Интеграция" value={event.integrationName ? `${event.integrationName} · ${event.integrationId}` : 'Не определена / не применимо'} />
         {event.integrationId && <Field label="Ответственный администратор" value={event.responsible ?? 'Неизвестен'} />}<Field label="Объект" value={event.target} />
         <Box><Typography variant="body2" color="text.secondary">Request ID</Typography><Stack direction="row" gap={1} alignItems="center"><Typography sx={{ fontFamily: 'monospace', fontSize: 14, overflowWrap: 'anywhere', flex: 1 }}>{event.requestId}</Typography><Tooltip title="Скопировать Request ID"><IconButton aria-label="Скопировать Request ID" onClick={() => copy(event.requestId)}><ContentCopyOutlined fontSize="small" /></IconButton></Tooltip></Stack></Box>
         {event.endpoint && <Field label="Запрос" value={`${event.method} ${event.endpoint}`} />}
