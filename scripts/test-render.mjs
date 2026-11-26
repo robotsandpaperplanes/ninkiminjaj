@@ -39,7 +39,7 @@ try {
   assert.equal(loadOrganizationState().productVisibility['Чаты'], true);
   assert.deepEqual(createOrganizationState(), original);
   console.log('PASS Organization working-copy load, validation and reset baseline');
-  for (const [section, version, title] of [['groups', '1', 'Группы (сейчас)'], ['groups', '2', 'Группы (мульти)'], ['groups', '3', 'Роли'], ['api', '1', 'API и вебхуки'], ['employees', '1', 'Сотрудники'], ['organization', '3', 'Организация']]) {
+  for (const [section, version, title] of [['groups', '1', 'Группы (сейчас)'], ['groups', '2', 'Группы (мульти)'], ['groups', '3', 'Роли'], ['api', '1', 'API и вебхуки'], ['employees', '1', 'Сотрудники'], ['organization', '1', 'Организация'], ['organization', '2', 'Организация'], ['organization', '3', 'Организация']]) {
     const stored = new Map([['mts-link-admin-active-section', section], ['mts-link-groups-active-version', version]]);
     globalThis.localStorage = { getItem: key => stored.get(key) ?? null };
     globalThis.location = { hash: '', pathname: '/', search: '' };
@@ -60,8 +60,21 @@ try {
     }
     if (section === 'organization') {
       assert.match(html, /aria-current="page"[^>]*>.*?Организация/);
-      for (const label of ['Управление продуктами', 'Права', 'Настройки', 'Телефония', 'Внутренние номера', '16,5 ГБ']) assert(html.includes(label));
-      assert.equal((html.match(/Перейти к настройкам по умолчанию/g) || []).length, 3);
+      for (const label of ['Управление продуктами', 'Телефония', 'Внутренние номера', '16,5 ГБ']) assert(html.includes(label));
+      assert.equal((html.match(/Перейти к настройкам по умолчанию/g) || []).length, 1);
+      const toBe = version === '2';
+      assert.equal(html.includes('aria-labelledby="organization-security"'), toBe);
+      assert.equal(html.includes('aria-label="Разрешить подключение через мобильный браузер"'), toBe);
+      assert.equal(html.includes('Сотрудники с электронной почтой в этом домене могут добавиться в организацию.'), toBe);
+      assert.equal((html.match(/aria-label="Использование хранилища"/g) || []).length, 1);
+      for (const key of ['rights', 'settings']) assert.equal(html.includes(`id="organization-panel-${key}"`), !toBe);
+      assert.equal(html.includes('id="organization-panel-defaults"'), toBe);
+      for (const label of ['Права и настройки по умолчанию', 'Права по умолчанию', 'Настройки по умолчанию']) {
+        assert.equal(html.includes('>' + label + '<'), toBe, label);
+      }
+      for (const label of ['Возможность создавать курсы', 'Запускать запись при старте мероприятия']) {
+        assert.equal(html.includes('aria-label="' + label + '"'), !toBe, label);
+      }
       assert(!html.includes('aria-label="Поиск ролей"'));
     }
     console.log(`PASS static render: ${title}`);
@@ -90,6 +103,11 @@ try {
     const html = renderToStaticMarkup(React.createElement(App));
     assert.match(html, new RegExp(`<h1[^>]*>${title.replace(/[()]/g, '\\$&')}</h1>`));
     assert(html.includes('Режим администрирования: ' + (path.startsWith('/cloud') ? 'Облако' : 'Сервер')));
+    if (path === '/cloud/security') {
+      assert(html.includes('Раздел «Безопасность» пока не представлен.'));
+      assert(!html.includes('Разрешённые типы файлов'));
+      assert(!html.includes('Контроль передачи конфиденциальных файлов'));
+    }
     if (path === '/cloud/federations') {
       for (const label of ['Приглашения · 3', 'Доверенные организации · 3', 'Показать ещё 1', 'Домен отсутствует', 'arcadefire.mts-link.ca']) assert(html.includes(label));
       assert.equal((html.match(/aria-label="Принять приглашение: /g) || []).length, 2);

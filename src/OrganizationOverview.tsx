@@ -9,7 +9,7 @@ import { organizationInvitationUrl, rotateOrganizationInvitation, type Organizat
 const logoFormats = ['image/png', 'image/jpeg', 'image/svg+xml'];
 const storageNumber = new Intl.NumberFormat('ru-RU');
 
-export default function OrganizationOverview({ draft, state, dirty, onChange, onSave, onCancel, notify }: {
+export default function OrganizationOverview({ draft, state, dirty, onChange, onSave, onCancel, notify, mobileBrowser }: {
   draft: OrganizationOverviewData;
   state: OrganizationState;
   dirty: boolean;
@@ -17,6 +17,7 @@ export default function OrganizationOverview({ draft, state, dirty, onChange, on
   onSave: () => void;
   onCancel: () => void;
   notify: (message: string) => void;
+  mobileBrowser?: { checked: boolean; onChange: (checked: boolean) => void };
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [savedLogo, setSavedLogo] = useState<File | null>(null);
@@ -50,7 +51,16 @@ export default function OrganizationOverview({ draft, state, dirty, onChange, on
     catch { notify('Не удалось скопировать ссылку'); }
   }
 
-  return <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 1fr)' }, gap: 3, alignItems: 'start' }}>
+  const domainJoining = <ToggleRow label="Разрешать добавляться сотрудникам по домену"
+    description={mobileBrowser ? 'Сотрудники с электронной почтой в этом домене могут добавиться в организацию.' : 'Настройка сохраняется в демоверсии.'}
+    checked={draft.domainJoining} onChange={domainJoining => onChange({ ...draft, domainJoining })} alignControl={!!mobileBrowser} />;
+  const files = <FilesWidget storage={state.storage} />;
+
+  return <Box sx={{
+    display: 'grid', gap: 3, alignItems: 'start',
+    gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: mobileBrowser ? 'minmax(0, 1fr)' : 'minmax(0, 2fr) minmax(0, 1fr)' },
+    maxWidth: mobileBrowser ? 652 : undefined,
+  }}>
     <Stack spacing={3} sx={{ minWidth: 0 }}>
       <Stack spacing={2}>
         <ProfileTextField label="Название организации" value={draft.name} required
@@ -105,28 +115,23 @@ export default function OrganizationOverview({ draft, state, dirty, onChange, on
           <Typography variant="body2" color="text.secondary">Защита паролем недоступна для демонстрационной ссылки.</Typography>
         </Stack>
       </Paper>
-      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-        <ToggleRow label="Разрешать добавляться сотрудникам по домену" description="Настройка сохраняется в демоверсии."
-          checked={draft.domainJoining} onChange={domainJoining => onChange({ ...draft, domainJoining })} />
-      </Paper>
+      {mobileBrowser ? <>
+        <Paper component="section" aria-labelledby="organization-security" variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
+          <Stack spacing={1.5}>
+            <Typography id="organization-security" component="h2" variant="h6">Безопасность</Typography>
+            {domainJoining}
+            <ToggleRow label="Разрешить подключение через мобильный браузер"
+              description="Разрешает участникам подключаться к встречам через браузер мобильного устройства."
+              checked={mobileBrowser.checked} onChange={mobileBrowser.onChange} alignControl />
+          </Stack>
+        </Paper>
+        {files}
+      </> : <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>{domainJoining}</Paper>}
       <SaveActions dirty={dirty || Boolean(pendingLogo)} disabled={!draft.name.trim() || imageError}
         onCancel={() => { setPendingLogo(null); onCancel(); }}
         onSave={() => { if (pendingLogo) setSavedLogo(pendingLogo); setPendingLogo(null); onSave(); }} />
     </Stack>
-    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
-      <Stack spacing={2}>
-        <Stack direction="row" flexWrap="wrap" alignItems="center" justifyContent="space-between" gap={1}>
-          <Typography component="h2" variant="h6">Файлы</Typography><Button disabled>Добавить тариф</Button>
-        </Stack>
-        <LinearProgress variant="determinate" color="success" aria-label="Использование хранилища"
-          value={Math.min(100, state.storage.usedGb / state.storage.quotaGb * 100)} sx={{ borderRadius: 1 }} />
-        <Stack direction="row" flexWrap="wrap" justifyContent="space-between" gap={1}>
-          <Typography variant="body2" color="text.secondary">{storageNumber.format(state.storage.usedGb)} ГБ используется</Typography>
-          <Typography variant="body2" color="text.secondary">из {storageNumber.format(state.storage.quotaGb)} ГБ</Typography>
-        </Stack>
-        <Typography variant="caption" color="text.secondary">Демонстрационные данные</Typography>
-      </Stack>
-    </Paper>
+    {!mobileBrowser && files}
     <Dialog open={rotateOpen} onClose={() => setRotateOpen(false)} maxWidth="xs" fullWidth aria-labelledby="organization-invite-rotate">
       <DialogTitle id="organization-invite-rotate">Создать новую ссылку?</DialogTitle>
       <DialogContent>Новая демонстрационная ссылка заменит предыдущую после сохранения изменений.</DialogContent>
@@ -139,4 +144,21 @@ export default function OrganizationOverview({ draft, state, dirty, onChange, on
       </DialogActions>
     </Dialog>
   </Box>;
+}
+
+function FilesWidget({ storage }: { storage: OrganizationState['storage'] }) {
+  return <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+      <Stack spacing={2}>
+        <Stack direction="row" flexWrap="wrap" alignItems="center" justifyContent="space-between" gap={1}>
+          <Typography component="h2" variant="h6">Файлы</Typography><Button disabled>Добавить тариф</Button>
+        </Stack>
+        <LinearProgress variant="determinate" color="success" aria-label="Использование хранилища"
+          value={Math.min(100, storage.usedGb / storage.quotaGb * 100)} sx={{ borderRadius: 1 }} />
+        <Stack direction="row" flexWrap="wrap" justifyContent="space-between" gap={1}>
+          <Typography variant="body2" color="text.secondary">{storageNumber.format(storage.usedGb)} ГБ используется</Typography>
+          <Typography variant="body2" color="text.secondary">из {storageNumber.format(storage.quotaGb)} ГБ</Typography>
+        </Stack>
+        <Typography variant="caption" color="text.secondary">Демонстрационные данные</Typography>
+      </Stack>
+    </Paper>;
 }

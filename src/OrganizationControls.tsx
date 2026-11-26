@@ -1,8 +1,8 @@
 import { useId } from 'react';
 import { Button, FormControlLabel, Stack, Switch, Typography } from '@mui/material';
 
-export function ToggleRow({ label, description, checked, onChange }: {
-  label: string; description?: string; checked: boolean; onChange: (checked: boolean) => void;
+export function ToggleRow({ label, description, checked, onChange, alignControl = false }: {
+  label: string; description?: string; checked: boolean; onChange: (checked: boolean) => void; alignControl?: boolean;
 }) {
   const descriptionId = useId();
   return <FormControlLabel labelPlacement="start"
@@ -13,7 +13,8 @@ export function ToggleRow({ label, description, checked, onChange }: {
     control={<Switch checked={checked} onChange={event => onChange(event.target.checked)}
       slotProps={{ input: { role: 'switch', 'aria-label': label, 'aria-describedby': description ? descriptionId : undefined } }} />}
     sx={{ m: 0, py: .75, gap: 1, justifyContent: 'space-between', alignItems: 'flex-start',
-      '& .MuiFormControlLabel-label': { py: .75, minWidth: 0 } }}
+      '& .MuiFormControlLabel-label': { py: .75, minWidth: 0, ...(alignControl && { flex: 1 }) },
+      ...(alignControl && { '& .MuiSwitch-root': { flex: 'none' } }) }}
   />;
 }
 

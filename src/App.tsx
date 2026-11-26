@@ -14,7 +14,7 @@ import SectionScenariosMenu from './SectionScenariosMenu';
 import ApiSection from './ApiSection';
 import { API_STORAGE, initialApiState, loadApiState } from './api-model';
 import { makeRoleDemo, roleExample, exampleRole, type RoleDemo } from './role-scenarios';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert, AppBar, Avatar, Box, Button, ButtonBase, Chip, CssBaseline, Dialog,
   DialogActions, DialogContent, DialogTitle, Divider, Drawer, IconButton, InputAdornment,
@@ -42,6 +42,10 @@ const MULTI_KEY = 'mts-link-groups-prototype-v2';
 const ROLE_KEY = 'mts-link-roles-prototype-v1';
 const sectionNames = { 1: 'Группы (сейчас)', 2: 'Группы (мульти)', 3: 'Роли' } as const;
 const VERSION_KEY = 'mts-link-groups-active-version';
+const organizationScenarios = [
+  { id: 'as-is', label: 'Текущий вариант (As Is)', helper: 'Текущие права и настройки организации' },
+  { id: 'to-be', label: 'Целевой вариант (To Be)', helper: 'Права и настройки по умолчанию через группы' },
+];
 function roleSeed(source: Group[]): Group[] {
   return structuredClone(source).filter(g => !g.systemGroup).map(g => ({ ...g, manager: '', description: undefined }));
 }
@@ -77,7 +81,7 @@ function cloudWorkspace(section: CloudSection): Exclude<CloudSection, 'multi-gro
 export default function App() {
   const { route, navigate } = useAdminRoute(next => {
     // Mode changes retain mounted drafts. Leaving a Cloud detail still uses its existing guard.
-    if (next.mode === 'on-prem' || (!selectedGroup && !organizationMode && !securityMode) || routePath(next) === lastCloudPath.current) return true;
+    if (next.mode === 'on-prem' || (!selectedGroup && !organizationMode) || routePath(next) === lastCloudPath.current) return true;
     const currentSection = version === 3 ? 'roles' : version === 2 ? 'multi-groups' : 'groups';
     if (selectedGroup && next.section === currentSection && next.id === selectedId) return true;
     let allowed = !leaveRef.current;
@@ -95,9 +99,10 @@ export default function App() {
   const [activeSection, setActiveSection] = useState(() => cloudWorkspace(initialCloud.section));
   const federationsMode = activeSection === 'federations';
   const organizationMode = activeSection === 'organization';
+  const organizationToBe = version === 2;
+  const showOrganizationVariant = useCallback((toBe: boolean) => setVersion(toBe ? 2 : 1), []);
   const securityMode = activeSection === 'security';
   const [security, setSecurity] = useState(loadSecurityState);
-  const [securityRevision, setSecurityRevision] = useState(0);
   useEffect(() => {
     try { localStorage.setItem(SECURITY_STORAGE, JSON.stringify(security)); } catch { /* Retain the in-memory working copy. */ }
   }, [security]);
@@ -243,7 +248,13 @@ export default function App() {
           {!onPrem && groupMode && <Tooltip title={roleMode ? 'Поиск ролей' : 'Поиск групп'}><IconButton aria-label={roleMode ? 'Поиск ролей' : 'Поиск групп'} color={searchOpen ? 'primary' : 'default'} onClick={() => { if (selectedGroup) { leaveRef.current?.(); return; } setSearchOpen(v => !v); setQuery(''); }}><SearchOutlined sx={{ fontSize: 22 }} /></IconButton></Tooltip>}
           <Tooltip title="Уведомления"><IconButton aria-label="Уведомления" sx={{ display: { xs: 'none', sm: 'inline-flex' } }} onClick={() => setNotice('Новых уведомлений нет')}><FlagOutlined sx={{ fontSize: 21 }} /></IconButton></Tooltip>
           <Box component="span" id="on-prem-scenarios" sx={{ display: onPrem ? 'inline-flex' : 'none' }} />
-          {!onPrem && <SectionScenariosMenu key={activeMenu} section={activeMenu} roles={roleMode} card={!!selectedGroup} active={roleDemo?.id} onSelect={id => { if (roleMode) selectRoleScenario(id); }} />}
+          {!onPrem && <SectionScenariosMenu key={activeMenu} section={activeMenu} roles={roleMode} card={!!selectedGroup}
+            entries={organizationMode ? organizationScenarios : undefined}
+            active={organizationMode ? (organizationToBe ? 'to-be' : 'as-is') : roleDemo?.id}
+            onSelect={id => {
+              if (organizationMode && id !== (organizationToBe ? 'to-be' : 'as-is')) setVersion(id === 'to-be' ? 2 : 1);
+              if (roleMode) selectRoleScenario(id);
+            }} />}
           <Tooltip title="Профиль и оформление"><IconButton aria-label="Профиль и оформление" aria-haspopup="menu" aria-expanded={Boolean(profileAnchor)} onClick={e => setProfileAnchor(e.currentTarget)} sx={{ p: .5, ml: { xs: 0, sm: .5 } }}><Avatar sx={{ width: 34, height: 34, bgcolor: 'action.selected', color: 'primary.main', border: 1, borderColor: 'divider' }}><PersonOutlineOutlined sx={{ fontSize: 21 }} /></Avatar></IconButton></Tooltip>
         </Toolbar>
       </AppBar>
@@ -258,8 +269,10 @@ export default function App() {
           <ModeVisibility.Provider value={!onPrem}><Box hidden={onPrem} sx={{ display: onPrem ? 'none' : 'block' }}>
           {!onPrem && route.mode === 'cloud' && route.id && !selectedGroup && !roleDemo && <Alert severity="warning" sx={{ mb: 3 }} action={<Button color="inherit" onClick={cloudList}>К списку</Button>}>Запись не найдена. Возможно, она была удалена или демоданные были сброшены.</Alert>}
           {federationsMode ? <FederationsSection /> : organizationMode ? <OrganizationSection key={organizationRevision} state={organization} setState={setOrganization}
-            employees={employeeDatabase.employees} notify={setNotice} leaveRef={leaveRef} onOpenGroupDefaults={openGroupDefaults} /> : securityMode ?
-            <SecuritySection key={securityRevision} state={security} onSave={setSecurity} notify={setNotice} leaveRef={leaveRef} /> : employeeMode ? <EmployeesSection database={employeeDatabase} setDatabase={setEmployeeDatabase} notify={setNotice} /> : apiMode ? <ApiSection state={apiState} setState={setApiState} notify={setNotice} query={query} setQuery={setQuery} /> : <>
+            employees={employeeDatabase.employees} notify={setNotice} leaveRef={leaveRef} onOpenGroupDefaults={openGroupDefaults}
+            toBe={organizationToBe} onShowVariant={showOrganizationVariant} mobileBrowser={security.mobileBrowser}
+            onSaveMobileBrowser={mobileBrowser => setSecurity(previous => ({ ...previous, mobileBrowser }))} /> : securityMode ?
+            <SecuritySection /> : employeeMode ? <EmployeesSection database={employeeDatabase} setDatabase={setEmployeeDatabase} notify={setNotice} /> : apiMode ? <ApiSection state={apiState} setState={setApiState} notify={setNotice} query={query} setQuery={setQuery} /> : <>
           {roleMode && roleDemo && <Alert severity="info" sx={{ mb: 3 }} action={<Button size="small" color="inherit" onClick={() => selectRoleScenario('restore')}>Вернуть исходный пример</Button>}>Сценарий: {roleDemo.label}. Изменения остаются в демонстрационном примере.</Alert>}
           {roleMode && roleDemo?.readOnly && <Alert severity="info" sx={{ mb: 3 }}>Вы можете просматривать роли. Для изменений нужно разрешение «Управление ролями и назначениями».</Alert>}
           {selectedGroup ? <DetailPage key={version + selectedGroup.id + (roleMode ? scenarioRevision : '')} readOnly={roleMode && !!roleDemo?.readOnly} scenario={roleMode && roleDemo?.card && selectedGroup.id === roleExample(roleDemo.card).id ? roleDemo.card : undefined} roleMode={advancedMode} group={selectedGroup} groups={groups} defaultTab={groupDefaultsTab}
@@ -356,16 +369,14 @@ export default function App() {
       <Box sx={{ px: 2, py: 1 }}><Typography variant="subtitle1">{onPrem ? 'Администратор сервера' : 'Администратор организации'}</Typography><Typography variant="caption" color="text.secondary">{onPrem ? 'Серверное администрирование' : organization.overview.name}</Typography></Box><Divider />
       <MenuItem onClick={() => { setDark(false); setProfileAnchor(null); }}><ListItemIcon><LightModeOutlined fontSize="small" /></ListItemIcon><ListItemText>Светлая тема</ListItemText>{!dark && <CheckOutlined fontSize="small" color="primary" />}</MenuItem>
       <MenuItem onClick={() => { setDark(true); setProfileAnchor(null); }}><ListItemIcon><DarkModeOutlined fontSize="small" /></ListItemIcon><ListItemText>Тёмная тема</ListItemText>{dark && <CheckOutlined fontSize="small" color="primary" />}</MenuItem>
-      {!onPrem && !federationsMode && <Divider />}
-      {!onPrem && !federationsMode && <MenuItem onClick={() => { setProfileAnchor(null); setResetOpen(true); }}><ListItemIcon><ReplayOutlined fontSize="small" /></ListItemIcon><ListItemText primary="Сбросить изменения" secondary={activeMenu} /></MenuItem>}
+      {!onPrem && !federationsMode && !securityMode && <Divider />}
+      {!onPrem && !federationsMode && !securityMode && <MenuItem onClick={() => { setProfileAnchor(null); setResetOpen(true); }}><ListItemIcon><ReplayOutlined fontSize="small" /></ListItemIcon><ListItemText primary="Сбросить изменения" secondary={activeMenu} /></MenuItem>}
     </Menu>
-    <Dialog open={!onPrem && !federationsMode && resetOpen} onClose={() => setResetOpen(false)} maxWidth="xs" fullWidth aria-labelledby="reset-title">
-      <DialogTitle id="reset-title">{organizationMode ? 'Вернуть исходные настройки организации?' : securityMode ? 'Вернуть исходные настройки безопасности?' : employeeMode ? 'Вернуть исходную базу сотрудников?' : apiMode ? 'Вернуть исходный пример API?' : roleMode ? 'Вернуть исходные роли?' : 'Вернуть исходные группы?'}</DialogTitle><DialogContent><Typography variant="body2" color="text.secondary">Изменения текущей версии будут сброшены. Данные остальных разделов сохранятся.</Typography></DialogContent><DialogActions sx={{ p: 2 }}><Button onClick={() => setResetOpen(false)}>Отмена</Button><Button color="error" onClick={() => { if (organizationMode) {
+    <Dialog open={!onPrem && !federationsMode && !securityMode && resetOpen} onClose={() => setResetOpen(false)} maxWidth="xs" fullWidth aria-labelledby="reset-title">
+      <DialogTitle id="reset-title">{organizationMode ? 'Вернуть исходные настройки организации?' : employeeMode ? 'Вернуть исходную базу сотрудников?' : apiMode ? 'Вернуть исходный пример API?' : roleMode ? 'Вернуть исходные роли?' : 'Вернуть исходные группы?'}</DialogTitle><DialogContent><Typography variant="body2" color="text.secondary">Изменения текущей версии будут сброшены. Данные остальных разделов сохранятся.</Typography></DialogContent><DialogActions sx={{ p: 2 }}><Button onClick={() => setResetOpen(false)}>Отмена</Button><Button color="error" onClick={() => { if (organizationMode) {
         setOrganization(createOrganizationState()); setOrganizationRevision(value => value + 1);
+        if (organizationToBe) setSecurity(previous => ({ ...previous, mobileBrowser: createSecurityState().mobileBrowser }));
         setResetOpen(false); setNotice('Исходные настройки организации восстановлены'); return;
-      } if (securityMode) {
-        setSecurity(createSecurityState()); setSecurityRevision(value => value + 1);
-        setResetOpen(false); setNotice('Исходные настройки безопасности восстановлены'); return;
       } if (employeeMode) { setEmployeeDatabase(createEmployeeDatabase()); setResetOpen(false); setNotice('Исходная база сотрудников восстановлена'); return; } if (apiMode) { setApiState(initialApiState()); setQuery(''); setResetOpen(false); setNotice('Исходный пример API восстановлен'); return; } setGroups(version === 2 ? ensureSystemGroups(roleSeed(initialGroups).map(hydrateGroup)) : (advancedMode ? roleSeed(initialGroups) : structuredClone(initialGroups)).map(hydrateGroup)); setSelectedId(null); navigate({ mode: 'cloud', section: cloudSection }, false, true); setQuery(''); setResetOpen(false); setNotice(roleMode ? 'Исходные роли восстановлены' : 'Исходные группы восстановлены'); }}>Вернуть</Button></DialogActions>
     </Dialog>
     <Snackbar open={!!notice} autoHideDuration={4500} onClose={() => setNotice('')} anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }} message={notice} action={<IconButton color="inherit" size="small" aria-label="Закрыть уведомление" onClick={() => setNotice('')}><CloseOutlined fontSize="small" /></IconButton>} />

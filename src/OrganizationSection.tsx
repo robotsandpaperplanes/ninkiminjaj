@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type RefObject, type SetStateAction } from 'react';
+import { useEffect, useState, type Dispatch, type ReactNode, type RefObject, type SetStateAction } from 'react';
 import { Alert, AlertTitle, Box, Button, Divider, MenuItem, Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, Typography } from '@mui/material';
 import { InfoOutlined } from '@mui/icons-material';
 import { visuallyHidden } from '@mui/utils';
@@ -11,21 +11,21 @@ import OrganizationOverview from './OrganizationOverview';
 import { SaveActions, ToggleRow } from './OrganizationControls';
 import type { GroupDefaultsTab } from './app/routes';
 
-const tabs = [
+const sharedTabs = [
   ['overview', 'Организация'],
   ['productVisibility', 'Управление продуктами'],
+] as const;
+const telephonyTab = ['telephony', 'Телефония'] as const;
+const asIsTabs = [
+  ...sharedTabs,
   ['rights', 'Права'],
   ['settings', 'Настройки'],
-  ['telephony', 'Телефония'],
+  telephonyTab,
 ] as const;
-type TabKey = typeof tabs[number][0];
+const toBeTabs = [...sharedTabs, ['defaults', 'Права и настройки'], telephonyTab] as const;
+type TabKey = typeof asIsTabs[number][0];
 type EditableTab = Exclude<TabKey, 'telephony'>;
 const rightsMetadata = Object.fromEntries(userRights.flatMap(section => section.items.map(item => [item.key, item])));
-const groupDefaultsTabs: Partial<Record<TabKey, GroupDefaultsTab>> = {
-  rights: 'permissions',
-  settings: 'settings',
-  productVisibility: 'products',
-};
 
 const extensions = [
   { extension: '201', label: 'Ресепшен', assigned: true },
@@ -34,29 +34,41 @@ const extensions = [
   { extension: '204', label: 'Резерв', assigned: false },
 ];
 
-export default function OrganizationSection({ state, setState, employees, notify, leaveRef, onOpenGroupDefaults }: {
+export default function OrganizationSection({ state, setState, employees, notify, leaveRef, onOpenGroupDefaults, toBe, onShowVariant, mobileBrowser, onSaveMobileBrowser }: {
   state: OrganizationState;
   setState: Dispatch<SetStateAction<OrganizationState>>;
   employees: Employee[];
   notify: (message: string) => void;
   leaveRef: RefObject<((after?: () => void) => void) | null>;
   onOpenGroupDefaults: (tab: GroupDefaultsTab) => void;
+  toBe: boolean;
+  onShowVariant: (toBe: boolean) => void;
+  mobileBrowser: boolean;
+  onSaveMobileBrowser: (checked: boolean) => void;
 }) {
   const [tab, setTab] = useState<TabKey>('overview');
   const [draft, setDraft] = useState(state);
+  const [mobileDraft, setMobileDraft] = useState(mobileBrowser);
   const [blocked, setBlocked] = useState(false);
 
-  const isDirty = (key: EditableTab) => JSON.stringify(draft[key]) !== JSON.stringify(state[key]);
-  const dirtyTab = tabs.find(([key]) => key !== 'telephony' && isDirty(key))?.[0];
+  const mobileDirty = mobileDraft !== mobileBrowser;
+  const isDirty = (key: EditableTab) => JSON.stringify(draft[key]) !== JSON.stringify(state[key])
+    || (key === 'overview' && toBe && mobileDirty);
+  const dirtyTab = asIsTabs.find(([key]) => key !== 'telephony' && isDirty(key))?.[0];
+  const blockedTab = dirtyTab ?? (mobileDirty ? 'overview' : undefined);
+  const selectedTab = toBe && (tab === 'rights' || tab === 'settings') ? 'defaults' : tab;
+  const tabs = toBe ? toBeTabs : asIsTabs;
 
   useEffect(() => {
-    if (!dirtyTab) return;
+    if (!blockedTab) return;
     leaveRef.current = () => {
+      if (toBe && (blockedTab === 'rights' || blockedTab === 'settings')) onShowVariant(false);
+      if (!toBe && !dirtyTab) onShowVariant(true);
       setBlocked(true);
-      setTab(dirtyTab);
+      setTab(blockedTab);
     };
     return () => { leaveRef.current = null; };
-  }, [dirtyTab, leaveRef]);
+  }, [blockedTab, dirtyTab, leaveRef, onShowVariant, toBe]);
 
   function change<K extends EditableTab>(key: K, value: OrganizationState[K]) {
     setDraft(previous => ({ ...previous, [key]: value }));
@@ -65,11 +77,16 @@ export default function OrganizationSection({ state, setState, employees, notify
   function actions<K extends EditableTab>(key: K) {
     return {
       dirty: isDirty(key),
-      onCancel: () => { change(key, state[key]); setBlocked(false); },
+      onCancel: () => {
+        change(key, state[key]);
+        if (key === 'overview' && toBe) setMobileDraft(mobileBrowser);
+        setBlocked(false);
+      },
       onSave: () => {
         const value = key === 'overview' ? { ...draft.overview, name: draft.overview.name.trim() } : draft[key];
         setState(previous => ({ ...previous, [key]: value }));
         setDraft(previous => ({ ...previous, [key]: value }));
+        if (key === 'overview' && toBe && mobileDirty) onSaveMobileBrowser(mobileDraft);
         setBlocked(false);
         notify('Изменения сохранены');
       },
@@ -89,6 +106,7 @@ export default function OrganizationSection({ state, setState, employees, notify
 
   const panels = {
     overview: <OrganizationOverview draft={draft.overview} state={state} notify={notify}
+      mobileBrowser={toBe ? { checked: mobileDraft, onChange: setMobileDraft } : undefined}
       onChange={value => change('overview', value)} {...actions('overview')} />,
     productVisibility: <Stack spacing={3} sx={{ maxWidth: 652 }}>
       <Typography>Управляйте видимостью продуктов для сотрудников по умолчанию.</Typography>
@@ -139,27 +157,39 @@ export default function OrganizationSection({ state, setState, employees, notify
 
   return <Box>
     <Typography component="h1" sx={visuallyHidden}>Организация</Typography>
-    <Tabs value={tab} onChange={(_, value: TabKey) => setTab(value)} aria-label="Разделы организации"
+    <Tabs value={selectedTab} onChange={(_, value: TabKey | 'defaults') => setTab(value === 'defaults' ? 'rights' : value)} aria-label="Разделы организации"
       variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
       {tabs.map(([key, label]) => <Tab key={key} value={key} label={label} id={`organization-tab-${key}`} aria-controls={`organization-panel-${key}`} />)}
     </Tabs>
-    {tabs.map(([key]) => {
-      const destination = groupDefaultsTabs[key];
-      return <Box key={key} role="tabpanel" hidden={tab !== key}
+    {tabs.map(([key]) => <Box key={key} role="tabpanel" hidden={selectedTab !== key}
         id={`organization-panel-${key}`} aria-labelledby={`organization-tab-${key}`}>
-        {destination && <GroupDefaultsBanner onOpen={() => onOpenGroupDefaults(destination)} />}
-        {blocked && dirtyTab && tab === key && <Alert severity="warning" sx={{ mb: 2 }}>Сохраните или отмените изменения, чтобы продолжить.</Alert>}
-        {panels[key]}
-      </Box>;
-    })}
+        {key === 'productVisibility' && <GroupDefaultsBanner onOpen={() => onOpenGroupDefaults('products')} />}
+        {blocked && dirtyTab === key && selectedTab === key && <Alert severity="warning" sx={{ mb: 2 }}>Сохраните или отмените изменения, чтобы продолжить.</Alert>}
+        {key === 'defaults'
+          ? <GroupDefaultsInformer title="Права и настройки по умолчанию"
+              description="Базовые права и настройки сотрудников теперь управляются в системной группе @everyone. Для отдельных категорий сотрудников можно задать собственные значения в соответствующих группах.">
+              <Stack direction="row" flexWrap="wrap" useFlexGap gap={.5} sx={{ mt: .5, ml: -.75 }}>
+                <Button size="small" onClick={() => onOpenGroupDefaults('permissions')}>Права по умолчанию</Button>
+                <Button size="small" onClick={() => onOpenGroupDefaults('settings')}>Настройки по умолчанию</Button>
+              </Stack>
+            </GroupDefaultsInformer>
+          : panels[key]}
+      </Box>)}
   </Box>;
 }
 
 function GroupDefaultsBanner({ onOpen }: { onOpen: () => void }) {
-  return <Alert severity="info" icon={<InfoOutlined fontSize="small" />} sx={{ mb: 3, maxWidth: 652, bgcolor: 'action.hover', color: 'text.primary' }}>
-    <AlertTitle>Настройки по умолчанию теперь управляются через группы</AlertTitle>
-    <Typography variant="body2">Права, настройки и доступ к продуктам для сотрудников организации теперь можно задавать в системной группе @everyone. Для отдельных категорий сотрудников используйте другие функциональные группы.</Typography>
+  return <GroupDefaultsInformer title="Настройки по умолчанию теперь управляются через группы"
+    description="Права, настройки и доступ к продуктам для сотрудников организации теперь можно задавать в системной группе @everyone. Для отдельных категорий сотрудников используйте другие функциональные группы.">
     <Button size="small" onClick={onOpen} sx={{ mt: .5, ml: -.75, textAlign: 'left' }}>Перейти к настройкам по умолчанию</Button>
+  </GroupDefaultsInformer>;
+}
+
+function GroupDefaultsInformer({ title, description, children }: { title: string; description: string; children: ReactNode }) {
+  return <Alert severity="info" icon={<InfoOutlined fontSize="small" />} sx={{ mb: 3, maxWidth: 652, bgcolor: 'action.hover', color: 'text.primary' }}>
+    <AlertTitle>{title}</AlertTitle>
+    <Typography variant="body2">{description}</Typography>
+    {children}
   </Alert>;
 }
 
