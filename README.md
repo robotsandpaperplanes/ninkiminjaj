@@ -1,4 +1,4 @@
-# MTS Link Admin Panel
+# LET'S GO TO THE BEACH, BITCH
 
 A unified Cloud and On-Prem interactive prototype. The UI is Russian; technical documentation is English. The npm package is `admin-panel`.
 
